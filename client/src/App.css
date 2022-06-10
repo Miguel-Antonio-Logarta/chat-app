@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Open+Sans&display=swap');
+/* 
+font-family: 'Montserrat', sans-serif;
+font-family: 'Open Sans', sans-serif;
+*/
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    font-family: 'Open Sans', sans-serif;
+    --dark-color: #242423;
+    --gray-color: #333533;
+    --boiled-egg-yolk:#F5CB5C;
+    --dark-blue: #0A111F;
+    --oxford-blue: #0F192E;
+    --orange-web: #FCA311;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+}
+
+button:hover, a:hover {
+    cursor: pointer;
+}
+
+.login-page, .sign-up-page {
+    background-color: var(--dark-blue);
+    /* background-color: var(--dark-blue); */
+    color: white;
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+}
+
+.auth-form {
+    display: grid;
+    /* justify-items: center; */
+    width: min(300px, 100%);
+    row-gap: 1.2em;
+}
+
+.auth-form h1, .auth-form p {
+    text-align: center;
+}
+
+.auth-form button {
+    color: black;
+    background: linear-gradient(320deg, var(--orange-web), var(--boiled-egg-yolk));
+}
+
+.auth-form button:active {
+    transform: translateY(3px);
+}
+
+.auth-form input {
+    background: var(--oxford-blue);
+    border: none;
+    color: white;
+}
+
+.auth-form button, .auth-form input {
+    padding: 1em;
+    border-radius: 4px;
+}
+
+.form-input {
+    display: grid;
+}
+
+.error-message {
+    font-size: 0.8em;
+    color: #D13D3D;
+    letter-spacing: 0.1em;
+    opacity: 1;
+}
+
+.centered-full-page {
+    height: 100vh;
+    width: 100vw;
+    background: var(--dark-blue);
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    color: white;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.not-found > div {
+    display: grid;
+    row-gap: 1.2em;
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: #EBEBEB;
+    opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color: #EBEBEB;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+    color: #EBEBEB;
+}
+
+.white-link {
+    color: white;
+    text-decoration: none;
+    text-align: center;
+}
+
+.white-link:hover {
+    text-decoration: underline;
+}
