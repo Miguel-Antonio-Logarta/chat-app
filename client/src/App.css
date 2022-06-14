@@ -20,6 +20,7 @@ font-family: 'Open Sans', sans-serif;
 body {
     width: 100vw;
     height: 100vh;
+    overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -124,3 +125,395 @@ button:hover, a:hover {
 .white-link:hover {
     text-decoration: underline;
 }
+
+.full-page-dark {
+    background: var(--dark-blue);
+    min-height: 100vh;
+    width: 100vw;
+    color: white;
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-rows: max-content auto;
+    grid-template-columns: 1fr;
+    /* grid-template: min-content 1fr 1fr / 1fr 1fr 1fr;
+    grid-template-areas: 
+        "header header header"
+        "side main main"
+        "side chatInput chatInput"; */
+    /* overflow-y: auto; */
+}
+
+.chat-select {
+    /* display: grid; */
+    /* grid-template: max-content auto auto / 1fr 1fr 1fr; */
+    /* grid-template-areas: 
+        "header header header"
+        "side main main"
+        "side chatInput chatInput"; */
+    /* grid-template-areas: 
+    "header header header"
+    "main main main"
+    "main main main"; */
+    /* grid-template-areas: 
+        "header header header"
+        "side main side"
+        "side main side"; */
+}
+
+/* header {
+    grid-area: header;
+} */
+
+header {
+    height: 64px;
+    position: fixed;
+}
+
+header nav {
+    width: 100vw;
+    padding: 0 32px;
+    background-color: var(--oxford-blue);
+    height: 64px;
+    display: grid;
+    grid-template-columns: auto max-content max-content;
+    grid-template-areas: "logo profile";
+    align-items: center;
+    color: white;
+}
+
+header nav ul {
+    list-style-type: none;
+    display: grid;
+    grid-template-columns: 1fr max-content;
+    align-items: center;
+    column-gap: 45px;
+    /* text-decoration: none; */
+}
+
+header nav ul li a {
+    text-decoration: none;
+    color: white;
+}
+
+.circle {
+    height: 40px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background-color: white;
+}
+
+.profile {
+    display: grid;
+    grid-template-columns: max-content auto;
+    column-gap: 22px;
+    align-items: center;
+}
+
+.logout-section button {
+    height: 40px;
+    background: var(--dark-blue);
+    color: white;
+    border: 1px solid var(--dark-blue);
+    border-radius: 4px;
+    /* font-size: 1em; */
+    width: 100px;
+}
+
+.chat-select-body {
+    /* grid-area: main;s */
+    /* padding-top: 200px; */
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    grid-template-columns: 1fr;
+    /* padding-top: 64px;
+    padding-bottom: 64px; */
+    padding: 64px 0px;
+}
+
+/* .server-overview {
+    display: grid;
+    grid-template: max-content auto / max-content auto;
+    grid-template-areas: 
+        "image title"
+        "image status";
+    align-items: center;
+    column-gap: 24px;
+}
+
+.server-overview {
+    background-color: var(--oxford-blue);
+    width: 600px;
+    border-radius: 8px;
+    padding: 16px;
+} */
+
+.status-circle, .server-icon, .large-server-icon, .profile-picture {
+    background-color: white;
+    border-radius: 50%;
+    aspect-ratio: 1/1;
+}
+
+.status-circle {
+    height: 12px;
+    /* aspect-ratio: 1/1; */
+}
+
+.server-icon {
+    height: 60px;
+    grid-area: image;
+}
+
+.online-status {
+    display: flex;
+    align-items: center;
+}
+
+.online {
+    background-color: green;
+    margin-right: 8px;
+}
+
+.offline {
+    background-color: gray;
+    margin: 0 8px 0 12px;
+}
+
+.online-numbers, .offline-numbers {
+    display: grid;
+    grid-template-columns: auto max-content;
+}
+
+.group-chat-member {
+    display: flex;
+    align-items: center;
+    column-gap: 12px;
+}
+
+.group-actions {
+    display: grid;
+    grid-template: 1fr / 1fr 1fr;
+    column-gap: 12px;
+    justify-items: stretch;
+    align-self: stretch;
+}
+.group-actions button {
+    background-color: var(--oxford-blue);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    height: 40px;
+    padding: 0 12px;
+}
+
+/* .server-overview h2 {
+    grid-area: title;
+} */
+
+.statuses {
+    grid-area: status;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+/* We are not using the chat select page anymore */
+/* .chat-select {
+    margin-top: 50px;
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-columns: max-content;
+    row-gap: 24px;
+} */
+
+.chat-room {
+    height: 100vh;
+    width: 100vw;
+    background-color: var(--dark-blue);
+    display: grid;
+    /* grid-template: max-content auto / repeat(3, 1fr); */
+    /* grid-template: max-content auto / max-content auto max-content; */
+    /* grid-template: max-content auto / 20% 60% 20%; */
+    /* grid-template: max-content auto / 1fr 3fr 1fr; */
+    grid-template: max-content auto max-content / 400px auto 400px;
+    grid-template-areas: 
+        "header header header"
+        "chat-select chat chat-room-info"
+        "chat-select-bottom chat-messages-input chat-room-info-bottom";
+}
+
+.chat-room header {
+    grid-area: header;
+    position: static;
+}
+
+.chat-select {
+    grid-area: chat-select;
+    background-color: var(--dark-blue);
+    padding: 32px 32px;
+    /* background-color: #14213E; */
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-messages {
+    grid-area: chat;
+    display: grid;
+    background: white;
+    grid-template: auto max-content / 1fr;
+}
+
+.chat-room-info {
+    grid-area: chat-room-info;
+    background-color: var(--dark-blue);
+    display: flex;
+    color: white;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px;
+    row-gap: 12px;
+    /* background-color: #14213E; */
+}
+
+.chat-select, .chat-room-info, .chat-messages {
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.messages-list {
+    /* background: #ebebeb; */
+    /* background: #14213E; */
+    background: var(--dark-blue);
+    /* background: #14213E; */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 32px;
+}
+
+.message {
+    column-gap: 12px;
+    row-gap: 12px;
+    display: grid;
+    grid-template: max-content max-content / max-content max-content;
+    grid-template-areas: 
+    "pfp message-content"
+    "pfp timestamp";
+}
+
+.message.owner {
+    align-self: flex-end;
+    grid-template-areas: 
+    "message-content pfp"
+    "timestamp pfp";
+}
+
+.message.owner .timestamp {
+    text-align: right;
+}
+
+.profile-picture {
+    grid-area: pfp;
+    height: 46px;
+}
+
+.message-content {
+    color: black;
+    background-color: white;
+    border-radius: 4px;
+    grid-area: message-content;
+    padding: 12px;
+}
+
+.timestamp {
+    grid-area: timestamp;
+    color: white;
+}
+/* .owner {
+
+} */
+
+.chat-messages-input, .chat-room-info-bottom, .chat-select-bottom {
+    height: 64px;
+    background-color: var(--oxford-blue);
+    /* background-color: #14213E; */
+}
+
+.chat-select-bottom {
+    grid-area: chat-select-bottom;
+}
+
+.chat-messages-input {
+    grid-area: chat-messages-input;
+    display: grid;
+    align-items: center;
+    grid-template: 1fr / max-content max-content 1fr max-content;
+    column-gap: 16px;
+    /* justify-items: center; */
+    color: white;
+    padding: 0 10%;
+    border-left: 1px solid var(--dark-blue);
+    border-right: 1px solid var(--dark-blue);
+}
+
+.square-button {
+    height: 40px;
+    width: 40px;
+    background-color: var(--dark-blue);
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.icon {
+    font-size: 25px;
+}
+
+.chat-messages-input input {
+    height: 40px;
+    background: #14213E;
+    border: none;
+    border-radius: 4px;
+    width: 100%;
+    color: white;
+    padding: 0 12px;
+}
+
+.chat-room-info-bottom {
+    grid-area: chat-room-info-bottom;
+}
+
+.send-message {
+    border-radius: 4px;
+    height: 40px;
+    padding: 0 25px;
+    /* color: white; */
+    background: linear-gradient(320deg, var(--orange-web), var(--boiled-egg-yolk));
+}
+
+.server-overview {
+    color: white;
+    display: grid;
+    grid-template: 1fr / max-content 1fr; 
+    grid-template-areas: 
+        "icon server-info";
+    column-gap: 16px;
+    margin-bottom: 32px;
+}
+
+.server-icon {
+    grid-area: icon;
+}
+
+.server-info {
+    grid-area: server-info;
+}
+
+.large-server-icon {
+    height: 100px;
+    /* background-color: white; */
+}
+
