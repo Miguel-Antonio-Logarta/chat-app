@@ -1,32 +1,22 @@
-from fastapi import FastAPI, WebSocket
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
+from fastapi_socketio import SocketManager
 
 app = FastAPI()
+socket_manager = SocketManager(app=app)
 
-origins = ["*"]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# html = ""
+# with open('index.html', 'r') as f:
+#     html = f.read()
 
 @app.get("/")
-async def root():
-    return {"message": "Hello World"}
+async def get():
+    return 'hello'
 
+@app.sio.on('client_connect_event')
+async def handle_client_connect_event(sid, *args, **kwargs):
+	await app.sio.emit('server_antwort01', {'data': 'connection was successful'})    
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        print(data)
-        # await websocket.send_text(f"Message text was: {data}")
-        await websocket.send_text(data)
-
-@app.post("/user/login")
-async def login():
-    return {"token": "12345"}
+@app.sio.on('client_start_event')
+async def handle_client_start_event(sid, *args, **kwargs):
+	print('Server says: start_event worked')
+	await app.sio.emit('server_antwort01',{'data':'start event worked'})
