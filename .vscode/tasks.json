@@ -1,0 +1,39 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "client",
+            "type": "shell",
+            // "command": "cd client && npm start",
+            "windows": {
+                // "command": "(cd client) -and (npm start)"
+                "command": "cd client ; npm start"
+            },
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "runOptions": {
+                "runOn": "folderOpen",
+            }
+        },
+        {
+            "label": "server",
+            "type": "shell",
+            "windows": {
+                "command": "cd server ; ./venv/Scripts/activate.ps1 ; uvicorn main:app --reload"
+            },
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "runOptions": {
+                "runOn": "folderOpen",
+            }
+        }
+    ]
+}

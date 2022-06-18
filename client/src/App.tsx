@@ -8,6 +8,7 @@ import NotFound from './routes/NotFound';
 import ChatSelect from './routes/ChatSelect';
 import AuthProvider from './components/AuthContext';
 import ChatRoom from './routes/ChatRoom';
+import SocketProvider from './components/SocketContext';
 // import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 // const client = new WebSocket('ws://127.0.0.1:8000/ws');
@@ -65,16 +66,18 @@ function App() {
 
   return (
       <AuthProvider>
-        <div className="App">
-          <Routes>
-            <Route index element={<ChatRoom />} />
-            <Route path="login" element={<Login />} />
-            <Route path="signUp" element={<SignUp />} />
-            <Route path="home" element={<ChatSelect />} />
-            <Route path="chat" element={<ChatRoom />} />
-            <Route path="*" element={<NotFound  />} />
-          </Routes>
-        </div>
+        <SocketProvider>
+          <div className="App">
+            <Routes>
+              <Route index element={<ChatRoom />} />
+              <Route path="login" element={<Login />} />
+              <Route path="signUp" element={<SignUp />} />
+              <Route path="home" element={<ChatSelect />} />
+              <Route path="chat" element={<ChatRoom />} />
+              <Route path="*" element={<NotFound  />} />
+            </Routes>
+          </div>
+        </SocketProvider>
       </AuthProvider>
   );
 }
