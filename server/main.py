@@ -22,12 +22,12 @@ async def get():
 
 @app.sio.on('client_connect_event')
 async def handle_client_connect_event(sid, *args, **kwargs):
-	await app.sio.emit('server_potatochipse', {'data': 'connection was successful'})    
+	await app.sio.emit('server_test', {'data': 'connection was successful'})    
 
 @app.sio.on('client_start_event')
 async def handle_client_start_event(sid, *args, **kwargs):
 	print('Server says: start_event worked')
-	await app.sio.emit('server_potatochipse',{'data':'start event worked'})
+	await app.sio.emit('server_test',{'data':'start event worked'})
 
 # @app.sio.on()
 

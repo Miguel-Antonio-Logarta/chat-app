@@ -8,10 +8,7 @@ from sqlalchemy.orm import Session
 import database
 import models
 from schemas import TokenData, User, UserInDB
-
-SECRET_KEY = "770e2df40b9f0dafd0d39392c15fa7f907de191bbc8775a006227071bcb657e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+import config
 
 fake_users_db = {
     "johndoe": {
@@ -55,9 +52,9 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.utcnow() + timedelta(minutes=config.settings.access_token_expire_minutes)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, config.settings.secret_key, algorithm=config.settings.algorithm)
     return encoded_jwt
 
 
@@ -68,7 +65,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, config.settings.secret_key, algorithms=[config.settings.algorithm])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
@@ -82,7 +79,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     return user
 
 
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
+# async def get_current_active_user(current_user: User = Depends(get_current_user)):
+#     if current_user.disabled:
+#         raise HTTPException(status_code=400, detail="Inactive user")
+#     return current_user

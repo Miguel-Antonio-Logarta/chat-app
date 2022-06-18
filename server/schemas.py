@@ -51,8 +51,10 @@ class CreateUser(BaseModel):
     
     @validator('password')
     def validate_password(cls, v):
-        if len(v) < 6 or len(v) > 64:
-            raise ValueError('Password is too short or too long')
-        return v
-        # if 6 >= len(v) >= 64:
+        if len(v) < 6:
+            raise ValueError('Password is too short (minimum is 6 characters long)')
+        elif len(v) > 64:
+            raise ValueError('Password is too long (maximum is 64 characters long)')
+        else:
+            return v
 

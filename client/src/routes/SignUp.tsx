@@ -1,7 +1,9 @@
 import { ErrorMessage } from "@hookform/error-message";
+import axios from "axios";
 import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { useAuth } from "../components/AuthContext";
 import ErrorMessageContainer from "../components/ErrorMessageContainer";
 
 type SignUpFormData = {
@@ -12,14 +14,47 @@ type SignUpFormData = {
 };
 
 const SignUp = () => {
+  const { onLogin } = useAuth();
   const {
+    setError,
     register,
     watch,
     handleSubmit,
     formState: { errors },
   } = useForm<SignUpFormData>();
   const onSubmit: SubmitHandler<SignUpFormData> = (data) => {
-    console.log(data);
+    // console.log(data);
+    const body = {
+      username: data.username,
+      email: data.email,
+      password: data.password
+    }
+    axios.post("http://127.0.0.1:8000/users/signup", body, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }).then(response => {
+      onLogin(response.data.access_token);
+    })
+    .catch(error => {
+      // Code is 409 when user or email already exists
+      if (error.response.status === 409) {
+        setError('username', {
+          type: 'server',
+          message: error.response.data.detail.username
+        })
+        setError('email', {
+          type: 'server',
+          message: error.response.data.detail.email
+        })
+      }
+      // Code is 422 when form validation fails
+      else if (error.response.status === 422) {
+        console.log("There was a problem validating your form in the server", error.response);
+      }
+      // console.log(error);
+    })
+
   };
   const emailRegex =
     /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
