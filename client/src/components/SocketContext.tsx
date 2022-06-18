@@ -9,7 +9,7 @@ type SocketProviderProps = {
     children: React.ReactNode;
 }
 
-export const socket = io('ws://localhost:8000', {
+export const socket = io(`${process.env.REACT_APP_WS}`, {
     path: '/ws/socket.io'
 }); 
 

@@ -15,7 +15,7 @@ const SendMessage = (props: Props) => {
   const { register, handleSubmit } = useForm<SendMessageForm>();
 
   const onSubmit: SubmitHandler<SendMessageForm> = (data) => {
-    // console.log(data);
+    console.log(data);
     socket?.emit("client_message_event", data);
   }
 

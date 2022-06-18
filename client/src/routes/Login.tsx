@@ -32,7 +32,7 @@ const Login = (props: Props) => {
     console.log(body);
     console.log(JSON.stringify(body));
     axios
-      .post("http://127.0.0.1:8000/users/login", body, {
+      .post(`${process.env.REACT_APP_API}/users/login`, body, {
         headers: {
           "Content-Type": "application/json",
         },

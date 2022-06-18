@@ -29,7 +29,7 @@ const SignUp = () => {
       email: data.email,
       password: data.password
     }
-    axios.post("http://127.0.0.1:8000/users/signup", body, {
+    axios.post(`${process.env.REACT_APP_API}/users/signup`, body, {
       headers: {
         "Content-Type": "application/json"
       }
