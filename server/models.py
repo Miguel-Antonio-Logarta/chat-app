@@ -13,3 +13,4 @@ class User(Base):
         nullable=False,
         server_default=text('now()')
     )
+

@@ -9,9 +9,11 @@ class EmailEmptyAllowedStr(EmailStr):
             return value
         return super().validate(value)
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
+
 
 class TokenData(BaseModel):
     username: Union[str, None] = None
@@ -26,6 +28,12 @@ class User(BaseModel):
 
 class UserInDB(User):
     hashed_password: str
+
+
+class LoginUser(BaseModel):
+    usernameOrEmail: str
+    password: str
+
 
 class CreateUser(BaseModel):
     username: str

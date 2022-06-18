@@ -1,6 +1,9 @@
 import React from 'react'
+import { useAuth } from './AuthContext'
 
 const Navbar = () => {
+  const { onLogout } = useAuth();
+
   return (
     <header>
       <nav>
@@ -12,7 +15,7 @@ const Navbar = () => {
           </li>
           <li className='logout-section'>
             {/* <a href="#">Log Out</a> */}
-            <button>Log Out</button>
+            <button onClick={onLogout} >Log Out</button>
           </li>
         </ul>
       </nav>
