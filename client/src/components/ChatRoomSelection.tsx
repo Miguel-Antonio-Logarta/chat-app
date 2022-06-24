@@ -23,21 +23,21 @@ const ChatRoomSelection = (props: Props) => {
           <div className='server-overview'>
             <div className='server-icon'></div>
             <div className='server-info'>
-              <h4>Jasmine Lorenzo</h4>
+              <h4>Bumber McSnazzle</h4>
               <p>Meeting next week Monday? @ 2:30 PM</p>
             </div>
           </div>
           <div className='server-overview'>
             <div className='server-icon'></div>
             <div className='server-info'>
-              <h4>Kiwilover's Group Chat</h4>
+              <h4>Ben Dover</h4>
               <p>Hey I really love kiwis, we should... @ 6:49 PM</p>
             </div>
           </div>
           <div className='server-overview'>
             <div className='server-icon'></div>
             <div className='server-info'>
-              <h4>Kiwilover's Group Chat</h4>
+              <h4>リリース's Baby</h4>
               <p>Hey I really love kiwis, we should... @ 6:49 PM</p>
             </div>
           </div>

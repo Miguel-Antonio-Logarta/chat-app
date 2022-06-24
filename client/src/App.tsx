@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 import Login from './routes/Login';
 import SignUp from './routes/SignUp';
@@ -10,7 +10,6 @@ import SocketProvider from './components/SocketContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-
   return (
       <AuthProvider>
         <SocketProvider>

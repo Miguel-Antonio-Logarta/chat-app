@@ -1,7 +1,6 @@
 import React from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { MdOutlineImage, MdTagFaces } from 'react-icons/md'
-import {io, Socket} from "socket.io-client"
+import { MdOutlineImage, MdTagFaces } from 'react-icons/md';
 import { useSocketContext } from './SocketContext';
 
 type Props = {
@@ -12,11 +11,16 @@ type SendMessageForm = {
 }
 const SendMessage = (props: Props) => {
   const { socket } = useSocketContext();
-  const { register, handleSubmit } = useForm<SendMessageForm>();
+  const { register, handleSubmit, reset } = useForm<SendMessageForm>();
 
   const onSubmit: SubmitHandler<SendMessageForm> = (data) => {
-    console.log(data);
-    socket?.emit("client_message_event", data);
+    socket.send(JSON.stringify({
+      type: "SEND_MESSAGE",
+      payload: {
+        "message": data.message
+      }
+    }));
+    reset();
   }
 
   return (

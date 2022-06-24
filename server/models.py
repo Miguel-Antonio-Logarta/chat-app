@@ -14,3 +14,37 @@ class User(Base):
         server_default=text('now()')
     )
 
+
+class Message(Base):
+    __tablename__ = "Message"
+    id = Column(BigInteger, primary_key=True, index=True)
+    room_id = Column(BigInteger, ForeignKey("Room.id"), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
+    message = Column(String(2000), nullable=False)
+    created_on = Column(
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=text('now()')
+    )
+
+class Room(Base):
+    __tablename__ = "Room"
+    id = Column(BigInteger, primary_key=True, index=True)
+    name = Column(String(64), nullable=False)
+    is_group_chat = Column(Boolean, nullable=False, server_default=text('False'))
+    created_on = Column(
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=text('now()')
+    )
+
+class Participants(Base):
+    __tablename__ = "Participants"
+    id = Column(BigInteger, primary_key=True, index=True)
+    room_id = Column(BigInteger, ForeignKey("Room.id"), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
+    created_on = Column(
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=text('now()')
+    )

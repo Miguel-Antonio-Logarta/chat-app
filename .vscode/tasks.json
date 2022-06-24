@@ -24,7 +24,7 @@
             "label": "server",
             "type": "shell",
             "windows": {
-                "command": "cd server ; ./venv/Scripts/activate.ps1 ; uvicorn main:app --reload"
+                "command": "cd server ; ./venv/Scripts/activate.ps1 ; uvicorn app:app --reload"
             },
             "group": "none",
             "presentation": {

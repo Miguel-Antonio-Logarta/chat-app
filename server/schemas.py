@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Union
 from pydantic import BaseModel, EmailStr, validator
 import re
@@ -15,19 +16,23 @@ class Token(BaseModel):
     token_type: str
 
 
+class TokenAndUser(Token):
+    username: str
+    user_id: int
+
+
 class TokenData(BaseModel):
     username: Union[str, None] = None
 
 
 class User(BaseModel):
+    id: int
     username: str
-    email: Union[str, None] = None
-    full_name: Union[str, None] = None
-    disabled: Union[bool, None] = None
+    email: EmailEmptyAllowedStr
+    created_on: datetime
 
-
-class UserInDB(User):
-    hashed_password: str
+    class Config: 
+        orm_mode = True
 
 
 class LoginUser(BaseModel):
@@ -58,3 +63,17 @@ class CreateUser(BaseModel):
         else:
             return v
 
+class SendMessage(BaseModel):
+    message: str
+
+class SendMessageOut(BaseModel):
+    id: int
+    user_id: int
+    room_id: int
+    username: str
+    message: str
+    timestamp: datetime
+
+class WSDataReceive(BaseModel):
+    type: str
+    payload: dict

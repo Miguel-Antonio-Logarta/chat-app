@@ -35,7 +35,11 @@ const ChatRoom = (props: Props) => {
   //   }
   // }, []);
   // const socket = useSocketContext();
-
+  const {socket} = useSocketContext();
+  useEffect(() => {
+    return () => socket.close();
+  })
+  
   return (
     <div className='chat-room'>
       <Navbar />
