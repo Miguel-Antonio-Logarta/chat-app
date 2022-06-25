@@ -38,8 +38,8 @@ class Room(Base):
         server_default=text('now()')
     )
 
-class Participants(Base):
-    __tablename__ = "Participants"
+class Participant(Base):
+    __tablename__ = "Participant"
     id = Column(BigInteger, primary_key=True, index=True)
     room_id = Column(BigInteger, ForeignKey("Room.id"), nullable=False)
     user_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)

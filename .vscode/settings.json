@@ -1,9 +1,9 @@
 {
   "python.linting.pylintEnabled": true,
   "python.linting.enabled": true,
-  "python.linting.pylintPath": "${workspaceFolder}/server/venv/Scripts/pylint"
-//   "python.linting.pylintArgs": [
-//     "--init-hook",
-//     "import sys; sys.path.append('./server')"
-// ]
+  "python.linting.pylintPath": "${workspaceFolder}/server/venv/Scripts/pylint",
+  "python.linting.pylintArgs": [
+    "--init-hook",
+    "import sys; sys.path.append('./server')"
+]
 }

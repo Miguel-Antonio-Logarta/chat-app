@@ -74,6 +74,27 @@ class SendMessageOut(BaseModel):
     message: str
     timestamp: datetime
 
+    # @validator('timestamp')
+    # def sdflkjsdf(dfkj, sdfkjsdf: datetime):
+    #     sdfkjsdf.isoformat()
+
 class WSDataReceive(BaseModel):
     type: str
     payload: dict
+
+class CreateRoom(BaseModel):
+    name: str
+    is_group_chat: bool = False
+
+    @validator('name')
+    def check_name_length(cls, v):
+        if len(v) > 64:
+            raise ValueError('Group chat name is too long')
+        else:
+            return v
+
+class LeaveRoom(BaseModel):
+    room_id: int
+
+class JoinRoom(BaseModel):
+    room_id: int
