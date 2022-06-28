@@ -15,7 +15,6 @@ manager = ConnectionManager()
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
-    # q: Union[int, None] = None,
     user: None | models.User = Depends(ws_get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -24,7 +23,8 @@ async def websocket_endpoint(
     if not user:
         return await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
 
-    await manager.connect(websocket)
+    # await manager.connect(websocket)
+    await manager.connect(websocket, user)
 
     while True:
         try:
@@ -35,7 +35,8 @@ async def websocket_endpoint(
                     message = schemas.SendMessage(**parsed_data.payload)
                     await chat_events.ws_send_message(websocket, message, user, db, manager)
                 case "GET_MESSAGES":
-                    await chat_events.ws_get_messages(websocket, user, db, manager)
+                    room = schemas.GetMessages(**parsed_data.payload)
+                    await chat_events.ws_get_messages(websocket, room, user, db, manager)
                 case "CREATE_ROOM":
                     new_room = schemas.CreateRoom(**parsed_data.payload)
                     await chat_events.ws_create_room(websocket, new_room, user, db, manager)
@@ -51,13 +52,13 @@ async def websocket_endpoint(
                     await websocket.send_json({"type": "NOT_FOUND", "payload": "No matching event"})
 
         except ValidationError as err:
-            await manager.send_personal_message({
+            await manager.send_personal_message(websocket, {
                 "type": "ERROR",
                 "payload": json.loads(err.json())
-            }, websocket)
+            })
             # continue to prevent disconnection
             continue
         except WebSocketDisconnect:
-            manager.disconnect(websocket)
+            manager.disconnect(user)
             return
 

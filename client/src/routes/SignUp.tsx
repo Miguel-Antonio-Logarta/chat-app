@@ -34,7 +34,8 @@ const SignUp = () => {
         "Content-Type": "application/json"
       }
     }).then(response => {
-      onLogin(response.data.access_token);
+      // onLogin(response.data.access_token);
+      onLogin(response.data.access_token, response.data.user_id, response.data.username);
     })
     .catch(error => {
       // Code is 409 when user or email already exists

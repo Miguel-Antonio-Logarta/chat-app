@@ -43,7 +43,7 @@ const Login = (props: Props) => {
         console.log("success", response.data);
         // props.handleLogin(data.token);
         // console.log("success", data.token);
-        onLogin(data.access_token);
+        onLogin(data.access_token, data.user_id, data.username);
       })
       .catch(function (error) {
         console.log("error", error);

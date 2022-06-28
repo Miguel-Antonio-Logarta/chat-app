@@ -350,7 +350,7 @@ header nav ul li a {
 .chat-select {
     grid-area: chat-select;
     background-color: var(--dark-blue);
-    padding: 32px 32px;
+    /* padding: 32px 32px; */
     /* background-color: #14213E; */
     display: flex;
     flex-direction: column;
@@ -426,7 +426,8 @@ header nav ul li a {
 
 .message-content p {
     display: inline-block;
-    word-break: break-all;
+    /* word-break: break-all; */
+    word-break: break-word;
     padding: 12px;
     color: black;
     background-color: white;
@@ -454,11 +455,13 @@ header nav ul li a {
 .chat-messages-input, .chat-room-info-bottom, .chat-select-bottom {
     height: 64px;
     background-color: var(--oxford-blue);
-    /* background-color: #14213E; */
+    /* background-color: #14213E; */    
 }
 
 .chat-select-bottom {
     grid-area: chat-select-bottom;
+    display: grid;
+    grid-template: 1fr / 1fr 1fr 1fr;
 }
 
 .chat-messages-input {
@@ -519,7 +522,13 @@ header nav ul li a {
     grid-template-areas: 
         "icon server-info";
     column-gap: 16px;
-    margin-bottom: 32px;
+    /* margin-bottom: 32px; */
+    padding: 16px 32px;
+}
+
+.server-overview:hover {
+    cursor: pointer;
+    background-color: var(--oxford-blue);
 }
 
 .server-icon {

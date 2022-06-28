@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Location } from "history";
 import { useCookies } from "react-cookie"
@@ -8,7 +8,9 @@ type Props = {
 
 type AuthContextType = {
     token: string | null;
-    onLogin: (tokenData: string) => Promise<void>;
+    userId: number | null;
+    username: string | null;
+    onLogin: (tokenData: string, userId: number, username: string) => Promise<void>;
     onLogout: () => void;
 }
 
@@ -30,6 +32,8 @@ export const useAuth = () => {
 const AuthProvider = ({children, ...props}: Props) => {
     const [cookies, setCookie, removeCookie] = useCookies(['token']);
     const [token, setToken] = useState<string | null>(null);
+    const [username, setUsername] = useState<string | null>(null);
+    const [userId, setUserId] = useState<number | null>(null);
     // const [authenticated, setAuthenticated] = useState<boolean>(false);
     const navigate = useNavigate();
     const location = useLocation() as unknown as LocationProps;
@@ -47,11 +51,13 @@ const AuthProvider = ({children, ...props}: Props) => {
     //     }
     // }, []);
 
-    const handleLogin = async (tokenData: string) => {
+    const handleLogin = async (tokenData: string, userId: number, username: string) => {
         // Instead why not have it be inside a sessionStorage instead of state.
         // setCookie('token', tokenData, {httpOnly: true});
         setCookie('token', tokenData);
         setToken(tokenData);
+        setUserId(userId);
+        setUsername(username);
         // setAuthenticated(true);
         // Store into a cookie
         // https://github.com/reach/router/issues/414
@@ -70,6 +76,8 @@ const AuthProvider = ({children, ...props}: Props) => {
     // });
     const value = {
         token,
+        username,
+        userId,
         onLogin: handleLogin,
         onLogout: handleLogOut,
     };

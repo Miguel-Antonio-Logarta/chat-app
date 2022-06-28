@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { useAuth } from './AuthContext';
 
@@ -8,6 +8,8 @@ import { useAuth } from './AuthContext';
 
 type SocketContextType = {
     socket: WebSocket;
+    currentRoom: number | null;
+    setCurrentRoom: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 type SocketProviderProps = {
@@ -27,7 +29,7 @@ export const useSocketContext = () => useContext(SocketContext);
 
 const SocketProvider = ({children, ...props}: SocketProviderProps) => {
     const { token, onLogout } = useAuth();
-
+    const [room, setRoom] = useState<number | null>(null);
     // const socket = io(`${process.env.REACT_APP_WS}`, {
     //     path: '/ws/socket.io'
     // }); 
@@ -55,7 +57,9 @@ const SocketProvider = ({children, ...props}: SocketProviderProps) => {
         })
     }
     const value = {
-        socket: ws
+        socket: ws,
+        currentRoom: room,
+        setCurrentRoom: setRoom
     }
 
     return (

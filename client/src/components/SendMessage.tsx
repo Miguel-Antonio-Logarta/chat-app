@@ -10,17 +10,20 @@ type SendMessageForm = {
   message: string;
 }
 const SendMessage = (props: Props) => {
-  const { socket } = useSocketContext();
+  const { socket, currentRoom } = useSocketContext();
   const { register, handleSubmit, reset } = useForm<SendMessageForm>();
 
   const onSubmit: SubmitHandler<SendMessageForm> = (data) => {
-    socket.send(JSON.stringify({
-      type: "SEND_MESSAGE",
-      payload: {
-        "message": data.message
-      }
-    }));
-    reset();
+    if (currentRoom !== null) {
+        socket.send(JSON.stringify({
+          type: "SEND_MESSAGE",
+          payload: {
+            "message": data.message,
+            "room_id": currentRoom
+          }
+        }));
+        reset();
+    }
   }
 
   return (

@@ -65,6 +65,7 @@ class CreateUser(BaseModel):
 
 class SendMessage(BaseModel):
     message: str
+    room_id: int
 
 class SendMessageOut(BaseModel):
     id: int
@@ -97,4 +98,7 @@ class LeaveRoom(BaseModel):
     room_id: int
 
 class JoinRoom(BaseModel):
+    room_id: int
+
+class GetMessages(BaseModel):
     room_id: int

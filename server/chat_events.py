@@ -9,11 +9,27 @@ from connection_manager import ConnectionManager
 
 async def ws_send_message(websocket: WebSocket, message: schemas.SendMessage, user: models.User, db: Session, manager: ConnectionManager):
     """Sends a message to a room"""
-    db_message = models.Message(**message.dict(), room_id=0, user_id=user.id)
+    # Check if user belongs to the room. Finds a participant that matches the room id, and sees if the user id matches that of the user
+    valid_room = db.query(models.Participant).filter(and_(models.Participant.room_id == message.room_id, models.Participant.user_id == user.id)).first()
+    if valid_room is None:
+        pass
+
+    db_message = models.Message(**message.dict(), user_id=user.id)
     db.add(db_message)
     db.commit()
     db.refresh(db_message)
-    await manager.emit(json.dumps({
+    # TODO: emit to a room instead of emitting to all clients
+    # await manager.emit(json.dumps({
+    #         "type": "SEND_MESSAGE",
+    #         "payload": {
+    #             "id": db_message.id,
+    #             "username": user.username,
+    #             "message": db_message.message,
+    #             "timestamp": db_message.created_on.isoformat()
+    #         }
+    #     }, indent=4, sort_keys=True, default=str)
+    # )
+    await manager.emit({
             "type": "SEND_MESSAGE",
             "payload": {
                 "id": db_message.id,
@@ -21,8 +37,7 @@ async def ws_send_message(websocket: WebSocket, message: schemas.SendMessage, us
                 "message": db_message.message,
                 "timestamp": db_message.created_on.isoformat()
             }
-        }, indent=4, sort_keys=True, default=str)
-    )
+        }, message.room_id, db)
 
 async def ws_get_rooms(websocket: WebSocket, user: models.User, db: Session, manager: ConnectionManager):
     """Gets all rooms that the user is a part of"""
@@ -42,7 +57,7 @@ async def ws_get_rooms(websocket: WebSocket, user: models.User, db: Session, man
         })
 
     await manager.send_personal_message(websocket, {
-        "type": "GET_MESSAGES",
+        "type": "GET_ROOMS",
         "payload": rooms_out
     })
 
@@ -119,6 +134,7 @@ async def ws_leave_room(websocket: WebSocket, room: schemas.LeaveRoom, user: mod
     db_participant_query.delete(synchronize_session=False)
     db.commit()
 
+    # TODO: Send this message to a room instead of all the clients
     await manager.broadcast(websocket, {
         "type": "PARTICIPANT_LEFT",
         "payload": {
@@ -145,9 +161,9 @@ async def ws_invite_friend():
     """Invites a friend to a room. User must belong to the room to invite friend"""
     pass
 
-async def ws_get_messages(websocket: WebSocket, user: models.User, db: Session, manager: ConnectionManager):
+async def ws_get_messages(websocket: WebSocket, room: schemas.GetMessages, user: models.User, db: Session, manager: ConnectionManager):
     """Gets all messages from a room"""
-    query = db.query(models.Message, models.User).filter(models.Message.user_id == models.User.id).all()
+    query = db.query(models.Message, models.User).filter(and_(models.Message.room_id == room.room_id, models.Message.user_id == models.User.id)).order_by(models.Message.created_on.asc()).all()
     messages_out: List[schemas.SendMessage] = []
     for db_message, db_user in query:
         messages_out.append({
@@ -158,7 +174,10 @@ async def ws_get_messages(websocket: WebSocket, user: models.User, db: Session, 
         })
     await manager.send_personal_message(websocket, {
         "type": "GET_MESSAGES",
-        "payload": messages_out
+        "payload": {
+            "room_id": room.room_id,
+            "messages": messages_out
+        }
     })
 
 # Get all rooms
