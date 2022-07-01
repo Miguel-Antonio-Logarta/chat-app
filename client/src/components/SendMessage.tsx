@@ -27,18 +27,19 @@ const SendMessage = (props: Props) => {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='chat-messages-input'>
-        <button className="square-button">
-        <MdOutlineImage className='icon'/>
-        </button>
-        
-        <button className="square-button">
-        <MdTagFaces className='icon' />
-        </button>
-
-        <input {...register("message")} placeholder='Type a message...'/>
-        <button type="submit" className='send-message'>Send Message</button>
-    </form>
+    // <div className="chat-messages-input">
+      <form onSubmit={handleSubmit(onSubmit)} className="chat-messages-input">
+          <button className="square-button">
+            <MdOutlineImage className='icon'/>
+          </button>
+      
+          <button className="square-button">
+            <MdTagFaces className='icon' />
+          </button>
+          <input {...register("message")} placeholder='Type a message...'/>
+          <button type="submit" className='send-message'>Send Message</button>
+      </form>
+    // </div>
   )
 }
 

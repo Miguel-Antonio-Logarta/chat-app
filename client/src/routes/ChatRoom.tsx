@@ -46,7 +46,7 @@ const ChatRoom = (props: Props) => {
       <ChatRoomSelection />
       <ChatRoomInformation />
       <MessageList />
-      <SendMessage />
+      {/* <SendMessage /> */}
     </div>
   )
 }

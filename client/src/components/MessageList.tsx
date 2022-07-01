@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
+import SendMessage from "./SendMessage";
 import { useSocketContext } from "./SocketContext";
 
 type MessageListProps = {
@@ -25,7 +26,7 @@ const Message = ({id, username, message, timestamp, placeRight}: MessageProps) =
   return (
     <div className={`message ${placeRight && `owner`}`}>
       <div className="profile-picture"></div>
-      <p className="username">{username} Id: {id}</p>
+      <p className="username">{username}</p>
       <div className="message-content">
         <p>{message}</p>
       </div>
@@ -36,6 +37,7 @@ const Message = ({id, username, message, timestamp, placeRight}: MessageProps) =
 
 const MessageList = (props: MessageListProps) => {
   const [messages, setMessages] = useState<MessageItem[]>([]);
+  const [roomName, setRoomName] = useState<string>("");
   const { username } = useAuth();
   const { socket, currentRoom, setCurrentRoom } = useSocketContext();
 
@@ -64,6 +66,7 @@ const MessageList = (props: MessageListProps) => {
         // We have to make sure that our current room is matching evt.payload.room_id
         setMessages(evt.payload.messages);
         setCurrentRoom(evt.payload.room_id);
+        setRoomName(evt.payload.room_name);
       }
     })
   }, [messages, socket, setCurrentRoom])
@@ -71,6 +74,12 @@ const MessageList = (props: MessageListProps) => {
   return (
     <div className="chat-messages">
       <div className="messages-list">
+        <div className="chat-name">
+          <h2>{roomName}</h2>
+        </div>
+        {/* Group Messages together. If previous message was sent less than one minute apart, put a 2px margin apart */}
+        {/* If previous message was sent more than 2 minutes apart, put a 4px margin apart with timestamp */}
+        {/* If previous message was more than an hour apart, put a --today at xx:xx PM / AM-- timestamp on top of message to indicate new conversation */}
         {messages.map(message => 
           <Message 
           key={message.id} 
@@ -81,6 +90,7 @@ const MessageList = (props: MessageListProps) => {
           placeRight={message.username === username}/>)
         }
       </div>
+      <SendMessage />
     </div>
   );
 };

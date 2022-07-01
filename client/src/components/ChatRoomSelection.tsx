@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { camelCaseKeys } from '../Utilities';
 import { useSocketContext } from './SocketContext'
+import { RiChatNewLine } from "react-icons/ri"
+import { AiOutlineUsergroupAdd } from "react-icons/ai"
+import { MdOutlineGroups } from "react-icons/md"
+import { BsChatDots } from "react-icons/bs"
 
 type ChatRoomSelectionProps = {}
+type GroupChatListProps = {}
 type ChatRoomItemProps = {
   roomId: number;
   roomName: string;
@@ -35,9 +40,10 @@ const ChatRoomItem = (props: ChatRoomItemProps) => {
   )
 }
 
-const ChatRoomSelection = (props: ChatRoomSelectionProps) => {
+const GroupChatList = (props: GroupChatListProps) => {
   const { socket } = useSocketContext();
   const [rooms, setRooms] = useState<any[]>([]);
+
   useEffect(() => {
     socket.addEventListener('open', (event) => {
       socket.send(JSON.stringify({
@@ -54,71 +60,57 @@ const ChatRoomSelection = (props: ChatRoomSelectionProps) => {
     })
   })
 
-  // socket.addEventListener('message', (event) => {
-  //   const evt = JSON.parse(event.data); 
-  //   if (evt.type === "SEND_MESSAGE") {
-  //     setMessages([
-  //       ...messages,
-  //       {
-  //         id: evt.payload.id,
-  //         username: evt.payload.username,
-  //         message: evt.payload.message,
-  //         timestamp: evt.payload.timestamp
-  //       }
-  //     ]);
-  //   } else if (evt.type === "GET_MESSAGES") {
-  //     setMessages(evt.payload);
-  //   }
+  return(
+    <div className="select-group-chat">
+      {rooms.map((room) => <ChatRoomItem
+        key={room.roomId}
+        roomId={room.roomId}
+        roomName={room.name}
+        isGroupChat={room.isGroupChat}
+        createdOn={room.createdOn}
+        description={"last message goes here "}
+        />)
+      }
+      {/* {rooms.map((room) => <ChatRoomItem
+        key={room.roomId}
+        roomId={room.roomId}
+        roomName={room.name}
+        isGroupChat={room.isGroupChat}
+        createdOn={room.createdOn}
+        description={"last message goes here "}
+        />)
+      }
+      {rooms.map((room) => <ChatRoomItem
+        key={room.roomId}
+        roomId={room.roomId}
+        roomName={room.name}
+        isGroupChat={room.isGroupChat}
+        createdOn={room.createdOn}
+        description={"last message goes here "}
+        />)
+      } */}
+    </div>
+  );
+}
+
+const ChatRoomSelection = (props: ChatRoomSelectionProps) => {
   return (
-    <>
-        <div className='chat-select'>
-          {rooms.map((room) => <ChatRoomItem 
-            key={room.roomId}
-            roomId={room.roomId} 
-            roomName={room.name} 
-            isGroupChat={room.isGroupChat} 
-            createdOn={room.createdOn} 
-            description={"last message goes here "}
-            />)
-          }
-          {/* <div className='server-overview'>
-            <div className='server-icon'></div>
-            <div className='server-info'>
-              <h4>Kiwilover's Group Chat</h4>
-              <p>Hey I really love kiwis, we should... @ 6:49 PM</p>
-            </div>
-          </div>
-          <div className='server-overview'>
-            <div className='server-icon'></div>
-            <div className='server-info'>
-              <h4>Your Local School Group Chat</h4>
-              <p>Alright we'll call later tonight to study. I have to ea... @ 6:49 PM</p>
-            </div>
-          </div>
-          <div className='server-overview'>
-            <div className='server-icon'></div>
-            <div className='server-info'>
-              <h4>Bumber McSnazzle</h4>
-              <p>Meeting next week Monday? @ 2:30 PM</p>
-            </div>
-          </div>
-          <div className='server-overview'>
-            <div className='server-icon'></div>
-            <div className='server-info'>
-              <h4>Ben Dover</h4>
-              <p>Hey I really love kiwis, we should... @ 6:49 PM</p>
-            </div>
-          </div>
-          <div className='server-overview'>
-            <div className='server-icon'></div>
-            <div className='server-info'>
-              <h4>リリース's Baby</h4>
-              <p>Hey I really love kiwis, we should... @ 6:49 PM</p>
-            </div>
-          </div> */}
-        </div>
-        <div className='chat-select-bottom'></div>
-    </>
+    <div className='chat-select'>
+      <h2>Group Chats</h2>
+      <GroupChatList />
+      <div className='chat-select-bottom'>
+        {/* Insert buttons here */}
+        <button className="chat-select-bottom-buttons">
+          <BsChatDots />
+        </button>
+        <button className="chat-select-bottom-buttons">
+          <AiOutlineUsergroupAdd />
+        </button>
+        <button className="chat-select-bottom-buttons">
+          <MdOutlineGroups />
+        </button>
+      </div>
+    </div>
   )
 }
 

@@ -163,6 +163,11 @@ async def ws_invite_friend():
 
 async def ws_get_messages(websocket: WebSocket, room: schemas.GetMessages, user: models.User, db: Session, manager: ConnectionManager):
     """Gets all messages from a room"""
+    db_room = db.query(models.Room).filter(models.Room.id == room.room_id).first()
+    if db_room is None:
+        # Send an error back
+        pass
+
     query = db.query(models.Message, models.User).filter(and_(models.Message.room_id == room.room_id, models.Message.user_id == models.User.id)).order_by(models.Message.created_on.asc()).all()
     messages_out: List[schemas.SendMessage] = []
     for db_message, db_user in query:
@@ -175,6 +180,7 @@ async def ws_get_messages(websocket: WebSocket, room: schemas.GetMessages, user:
     await manager.send_personal_message(websocket, {
         "type": "GET_MESSAGES",
         "payload": {
+            "room_name": db_room.name,
             "room_id": room.room_id,
             "messages": messages_out
         }
