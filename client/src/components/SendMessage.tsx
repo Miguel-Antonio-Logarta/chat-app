@@ -36,7 +36,7 @@ const SendMessage = (props: Props) => {
           <button className="square-button">
             <MdTagFaces className='icon' />
           </button>
-          <input {...register("message")} placeholder='Type a message...'/>
+          <input {...register("message")} autoComplete="off" placeholder='Type a message...'/>
           <button type="submit" className='send-message'>Send Message</button>
       </form>
     // </div>
