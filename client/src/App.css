@@ -66,7 +66,8 @@ button:hover, a:hover {
 
 .auth-form button {
     color: black;
-    background: linear-gradient(320deg, var(--orange-web), var(--boiled-egg-yolk));
+    /* background: linear-gradient(320deg, var(--orange-web), var(--boiled-egg-yolk)); */
+    background: linear-gradient(320deg, var(--primary), var(--primary-variant));
 }
 
 .auth-form button:active {
@@ -581,15 +582,16 @@ header nav ul li a {
 .profile-picture {
     grid-area: pfp;
     height: 46px;
+    margin: 0 12px;
 }
 
-.message .profile-picture {
+/* .message .profile-picture {
     margin-right: 12px;
 }
 
 .message.owner .profile-picture {
     margin-left: 12px;
-}
+} */
 
 .group-chat-member .profile-picture {
     height: 40px;
@@ -720,7 +722,7 @@ header nav ul li a {
     border: none;
     border-left: 1px solid var(--dark-desaturated-blue);
     /* border-radius: 4px; */
-    width: 100%;
+    /* width: 100%; */
     color: var(--off-white);
     padding: 24px 16px;
     font-size: 16px;
@@ -743,7 +745,7 @@ header nav ul li a {
     height: 40px;
     padding: 0 25px;
     color: var(--dark-desaturated-blue);
-    background: linear-gradient(320deg, var(--primary), var(--secondary) 80%);
+    background: linear-gradient(320deg, var(--primary), var(--primary-variant) 80%);
 }
 
 .server-overview:first-of-type {

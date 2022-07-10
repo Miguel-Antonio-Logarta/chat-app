@@ -7,10 +7,10 @@ type Props = {
 }
 
 const ProtectedRoute = ({ children, ...props }: Props) => {
-    const { token } = useAuth();
+    const { authenticated } = useAuth();
     const location = useLocation();
 
-    if (!token) {
+    if (!authenticated) {
         return <Navigate to="/login" replace state={{from: location}} />;
     }
     

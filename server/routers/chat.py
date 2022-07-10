@@ -31,6 +31,8 @@ async def websocket_endpoint(
             data = await websocket.receive_text()
             parsed_data = schemas.WSDataReceive(**json.loads(data))
             match parsed_data.type:
+                # case "PING":
+                #     await chat_events.pong(websocket, manager)
                 case "SEND_MESSAGE":
                     message = schemas.SendMessage(**parsed_data.payload)
                     await chat_events.ws_send_message(websocket, message, user, db, manager)

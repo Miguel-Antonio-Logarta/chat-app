@@ -7,6 +7,13 @@ import json
 from fastapi import WebSocket
 from connection_manager import ConnectionManager
 
+async def pong(websocket: WebSocket, manager: ConnectionManager):
+    print(f'ping recieved from {websocket}')
+    await manager.send_personal_message(websocket, {
+        "type": "PONG",
+        "payload": {}
+    })
+
 async def ws_send_message(websocket: WebSocket, message: schemas.SendMessage, user: models.User, db: Session, manager: ConnectionManager):
     """Sends a message to a room"""
     # Check if user belongs to the room. Finds a participant that matches the room id, and sees if the user id matches that of the user

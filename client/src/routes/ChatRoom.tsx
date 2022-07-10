@@ -6,6 +6,8 @@ import MessageList from '../components/MessageList'
 import SendMessage from '../components/SendMessage'
 import {io, Socket} from 'socket.io-client';
 import { useSocketContext } from '../components/SocketContext'
+// import { useWSContext } from '../components/WSContext'
+// import { useSocketContextV2 } from '../components/SocketContextV2'
 
 type Props = {}
 
@@ -35,11 +37,31 @@ const ChatRoom = (props: Props) => {
   //   }
   // }, []);
   // const socket = useSocketContext();
-  const {socket} = useSocketContext();
+  // const { socket } = useSocketContext();
+  // const { socket } = useWSContext();
+
+  // useEffect(() => {
+  //   return () => socket.close();
+  // })
+  // const { getSocket } = useSocketContextV2();
+  // useEffect(() => {
+  //   return () => {
+  //     const socket = getSocket();
+  //     if (socket){
+  //       socket.close();
+  //     }
+  //   }
+  // })
+  const { socket, isConnected } = useSocketContext();
+
   useEffect(() => {
-    return () => socket.close();
+   return () => {
+    if (isConnected) {
+      socket.close();
+    }
+   } 
   })
-  
+
   return (
     <div className='chat-room'>
       <Navbar />
