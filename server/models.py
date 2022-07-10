@@ -48,3 +48,19 @@ class Participant(Base):
         nullable=False,
         server_default=text('now()')
     )
+
+class OnlineUser(Base):
+    __tablename__ = "OnlineUser"
+    id = Column(BigInteger, primary_key=True, index=True)
+    user_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
+    current_room_id = Column(BigInteger, ForeignKey("Room.id"), nullable=True)
+    # room_id = Column()
+
+# TODO: Add a friends table for friend requests
+# class Friend(Base):
+#     __tablename__ = "Friend"
+#     id = Column(BigInteger, primary_key=True, index=True)
+#     user_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
+#     friend_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
+#     # Status for whether friend request is accepted, rejected, pending, or deleted
+#     status = Column(Integer, nullable=False, default="0")

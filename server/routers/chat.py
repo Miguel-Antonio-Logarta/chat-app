@@ -24,7 +24,7 @@ async def websocket_endpoint(
         return await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
 
     # await manager.connect(websocket)
-    await manager.connect(websocket, user)
+    await manager.connect(websocket, user, db)
 
     while True:
         try:
@@ -61,6 +61,6 @@ async def websocket_endpoint(
             # continue to prevent disconnection
             continue
         except WebSocketDisconnect:
-            manager.disconnect(user)
+            manager.disconnect(user, db)
             return
 

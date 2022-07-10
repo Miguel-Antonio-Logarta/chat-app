@@ -40,17 +40,24 @@ class ConnectionManager:
         # {user_id: websocket}
         self.active_connections: dict[int, WebSocket] = {}
     
-    async def connect(self, websocket: WebSocket, user: models.User):
+    async def connect(self, websocket: WebSocket, user: models.User, db: Session):
         # self.active_connections.append(websocket)
         # self.active_connections.append(ConnectedUser(websocket))
         self.active_connections[user.id] = websocket
         # Add user to onlineusers table
+        db_online_user = models.OnlineUser(user_id=user.id)
+        db.add(db_online_user)
+        db.commit()
+        # db.add()
 
-    def disconnect(self, user: models.User):
+    def disconnect(self, user: models.User, db: Session):
         # self.active_connections.remove(websocket)
         # self.active_connections = self.active_connections.filter(lambda user: user.websocket == websocket)
         # Remove user from onlineusers table
         self.active_connections.pop(user.id, None)
+        online_user = db.query(models.OnlineUser).filter(models.OnlineUser.user_id == user.id).first()
+        db.delete(online_user)
+        db.commit()
 
     async def send_personal_message(self, websocket: WebSocket, message: dict):
         # if isinstance(message) is dict:
