@@ -52,7 +52,7 @@ class Participant(Base):
 class OnlineUser(Base):
     __tablename__ = "OnlineUser"
     id = Column(BigInteger, primary_key=True, index=True)
-    user_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("User.id"), unique=True, nullable=False)
     current_room_id = Column(BigInteger, ForeignKey("Room.id"), nullable=True)
     # room_id = Column()
 

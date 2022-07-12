@@ -723,6 +723,7 @@ header nav ul li a {
     border-left: 1px solid var(--dark-desaturated-blue);
     /* border-radius: 4px; */
     /* width: 100%; */
+    width: calc(100% - 16px);
     color: var(--off-white);
     padding: 24px 16px;
     font-size: 16px;
@@ -898,14 +899,33 @@ header nav ul li a {
     margin-left: .8em;
 }
 
-.online span, .online-status.online .online-status-number  {
+/* .online span, .online-status.online .online-status-number  {
+    color: var(--green);
+} */
+
+.online-users .online-status span, .online-users .online-status .online-status-number {
     color: var(--green);
 }
-
-.offline-users, .online-status.offline .online-status-number {
+.offline-users, .offline-users .online-status-number, .offline-users .online-status .online-status-number {
 /* .offline-users, .offline span { */
     /* color: #B6B6B6; */
     color: var(--gray);
+}
+
+.modal {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(0,0,0,0.5);
+    color: var(--off-white);
+    z-index: 11;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* color: "##FFF"; */
+    /* fontSize: "40px"; */
 }
 
 /* width */

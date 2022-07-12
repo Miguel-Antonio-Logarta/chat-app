@@ -102,3 +102,6 @@ class JoinRoom(BaseModel):
 
 class GetMessages(BaseModel):
     room_id: int
+
+class GetRoomInfo(BaseModel):
+    room_id: int

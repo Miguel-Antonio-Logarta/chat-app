@@ -3,7 +3,7 @@ import axios from "axios";
 import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { useAuth } from "../components/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import ErrorMessageContainer from "../components/ErrorMessageContainer";
 
 type SignUpFormData = {

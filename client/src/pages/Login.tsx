@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { AuthContext, useAuth } from "../components/AuthContext";
+import { AuthContext, useAuth } from "../context/AuthContext";
 
 type Props = {
   // handleLogin: (tokenData: string) => Promise<void>

@@ -193,6 +193,42 @@ async def ws_get_messages(websocket: WebSocket, room: schemas.GetMessages, user:
         }
     })
 
+async def ws_get_room_info(websocket: WebSocket, room: schemas.GetRoomInfo, user: models.User, db: Session, manager: ConnectionManager):
+    current_room = db.query(models.Room).filter(models.Room.id == room.room_id).first()
+    
+    # Get all online and offline users
+    all_users = db.query(models.Participant, models.User, models.OnlineUser) \
+                  .join(models.User, models.Participant.user_id == models.User.id, isouter=True) \
+                  .join(models.OnlineUser, models.Participant.user_id == models.OnlineUser.user_id, isouter=True) \
+                  .filter(models.Participant.room_id == room.room_id).all()
+
+    online_users = []
+    offline_users = []
+    for db_participant, db_user, db_online_user in all_users:
+        # if db_participant is None and db_user is None:
+        #     print("Participant and User is None!")
+        if db_participant is not None and db_online_user is not None:
+            online_users.append({
+                "user_id": db_participant.user_id,
+                "username": db_user.username
+            })
+        elif db_participant is not None and db_online_user is None:
+            offline_users.append({
+                "user_id": db_participant.user_id,
+                "username": db_user.username
+            })
+
+    await manager.send_personal_message(websocket, {
+        "type": "GET_ROOM_INFO",
+        "payload": {
+            "room_id": current_room.id,
+            "room_name": current_room.name,
+            "is_group_chat": current_room.is_group_chat,
+            "online_users": online_users,
+            "offline_users": offline_users
+        }
+    })
+
 # Get all rooms
 # Create Room
 # Leave Room

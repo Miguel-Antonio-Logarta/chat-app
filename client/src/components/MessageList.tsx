@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "../context/AuthContext";
 import SendMessage from "./SendMessage";
-import { useSocketContext } from "./SocketContext";
+import { useSocketContext } from "../context/SocketContext";
 import Message from "./Message";
 
 type MessageListProps = {};

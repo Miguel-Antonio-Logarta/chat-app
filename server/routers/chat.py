@@ -50,6 +50,9 @@ async def websocket_endpoint(
                     await chat_events.ws_join_room(websocket, room, user, db, manager)
                 case "GET_ROOMS":
                     await chat_events.ws_get_rooms(websocket, user, db, manager)
+                case "GET_ROOM_INFO":
+                    room = schemas.GetRoomInfo(**parsed_data.payload)
+                    await chat_events.ws_get_room_info(websocket, room, user, db, manager)
                 case _:
                     await websocket.send_json({"type": "NOT_FOUND", "payload": "No matching event"})
 
@@ -61,6 +64,7 @@ async def websocket_endpoint(
             # continue to prevent disconnection
             continue
         except WebSocketDisconnect:
+            print("User has disconnected")
             manager.disconnect(user, db)
             return
 

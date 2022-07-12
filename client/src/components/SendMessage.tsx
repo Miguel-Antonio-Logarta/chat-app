@@ -1,7 +1,7 @@
 import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { MdOutlineImage, MdTagFaces } from "react-icons/md";
-import { useSocketContext } from "./SocketContext";
+import { useSocketContext } from "../context/SocketContext";
 
 type Props = {};
 

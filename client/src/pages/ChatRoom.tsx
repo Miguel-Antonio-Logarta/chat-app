@@ -5,7 +5,7 @@ import ChatRoomSelection from '../components/ChatRoomSelection'
 import MessageList from '../components/MessageList'
 import SendMessage from '../components/SendMessage'
 import {io, Socket} from 'socket.io-client';
-import { useSocketContext } from '../components/SocketContext'
+import { useSocketContext } from '../context/SocketContext'
 // import { useWSContext } from '../components/WSContext'
 // import { useSocketContextV2 } from '../components/SocketContextV2'
 
@@ -56,9 +56,9 @@ const ChatRoom = (props: Props) => {
 
   useEffect(() => {
    return () => {
-    if (isConnected) {
-      socket.close();
-    }
+    // if (isConnected) {
+    //   socket.close();
+    // }
    } 
   })
 

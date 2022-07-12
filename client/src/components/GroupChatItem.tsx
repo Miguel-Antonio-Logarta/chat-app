@@ -1,5 +1,6 @@
 import React from 'react'
-import { useSocketContext } from "./SocketContext";
+import { snakeCaseKeys } from '../utils/Utilities';
+import { useSocketContext } from "../context/SocketContext";
 
 
 type GroupChatItemProps = {
@@ -22,9 +23,17 @@ const GroupChatItem = (props: GroupChatItemProps) => {
             room_id: props.roomId
           }
         }))
+        
+        socket.send(JSON.stringify(snakeCaseKeys({
+          type: "GET_ROOM_INFO",
+          payload: {
+            roomId: props.roomId
+          } 
+        })))
       }
     }
-  
+    
+    
     return (
       <div onClick={handleClick} className='server-overview'>
         <div className='server-icon'></div>
