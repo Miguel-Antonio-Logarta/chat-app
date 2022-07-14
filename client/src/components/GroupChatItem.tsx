@@ -1,5 +1,5 @@
 import React from 'react'
-import { snakeCaseKeys } from '../utils/Utilities';
+import { camelCaseKeys, snakeCaseKeys } from '../utils/Utilities';
 import { useSocketContext } from "../context/SocketContext";
 
 
@@ -24,6 +24,20 @@ const GroupChatItem = (props: GroupChatItemProps) => {
           }
         }))
         
+        socket.addEventListener('message', (event) => {
+          // if (event.data.type === "GET_MESSAGES") {
+          //   const data = camelCaseKeys(JSON.parse(event.data));
+          //   setCurrentRoom
+          // }
+          // console.log(data);
+          // if (data.type === "GET_ROOM_INFO") {
+          //   setRoomName(data.payload.roomName);
+          //   setOnlineUsers(data.payload.onlineUsers);
+          //   setOfflineUsers(data.payload.offlineUsers);
+          //   setCurrentRoom(data.payload.roomId);
+          // }
+        })
+
         socket.send(JSON.stringify(snakeCaseKeys({
           type: "GET_ROOM_INFO",
           payload: {

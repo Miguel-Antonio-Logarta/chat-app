@@ -16,10 +16,12 @@ const GroupMembersStatus = (props: Props) => {
       </div>
       <div className="group-chat-member-list">
         {props.groupMembers.map((member) => (
-          <div className="group-chat-member">
-            <div className="profile-picture"></div>
-            <h4>{member.username}</h4>
-          </div>
+          <React.Fragment key={member.userId}>
+            <div className="group-chat-member">
+              <div className="profile-picture"></div>
+              <h4>{member.username}</h4>
+            </div>
+          </React.Fragment>
         ))}
       </div>
     </div>

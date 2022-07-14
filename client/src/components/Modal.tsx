@@ -2,12 +2,12 @@ import React from 'react'
 
 type Props = {
     children?: React.ReactNode;
-    close: any;
+    onClose: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-const Modal = ({children, close, ...props}: Props) => {
+const Modal = ({children, onClose, ...props}: Props) => {
     return (
-        <div className='modal' onClick={close}>
+        <div className='modal' onMouseDown={onClose}>
             {children}
         </div>
     )

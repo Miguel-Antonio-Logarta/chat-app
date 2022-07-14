@@ -5,7 +5,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ErrorMessageContainer from "../components/ErrorMessageContainer";
-
+import { emailRegex, usernameRegex } from "../data/constants";
 type SignUpFormData = {
   username: string;
   email: string;
@@ -57,9 +57,7 @@ const SignUp = () => {
     })
 
   };
-  const emailRegex =
-    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-  const usernameRegex = /^[A-Za-z0-9_-]{6,30}$/;
+  
 
   return (
     <div className="sign-up-page">

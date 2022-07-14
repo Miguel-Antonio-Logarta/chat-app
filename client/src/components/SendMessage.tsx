@@ -2,6 +2,7 @@ import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { MdOutlineImage, MdTagFaces } from "react-icons/md";
 import { useSocketContext } from "../context/SocketContext";
+import { noBlankSpacesRegex } from "../data/constants";
 
 type Props = {};
 
@@ -27,7 +28,7 @@ const SendMessage = (props: Props) => {
       reset();
     }
   };
-
+  
   return (
     // <div className="chat-messages-input">
     <form onSubmit={handleSubmit(onSubmit)} className="chat-messages-input">
@@ -39,7 +40,10 @@ const SendMessage = (props: Props) => {
         <MdTagFaces className="icon" />
       </button>
       <input
-        {...register("message")}
+        {...register("message", {
+          disabled: currentRoom == null ? true : false,
+          pattern: noBlankSpacesRegex
+        })}
         autoComplete="off"
         placeholder="Type a message..."
       />
