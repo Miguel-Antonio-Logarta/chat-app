@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { MdClose, MdContentCopy, MdSearch } from "react-icons/md";
 import Modal from "./Modal";
 import {friends} from "../data/testData";
@@ -24,6 +24,17 @@ const InviteFriendItem = (props: InviteFriendItemProps) => {
   )
 }
 const InviteGroupMembers = ({ showSelf, ...props }: Props) => {
+  const [currentSearch, setCurrentSearch] = useState("");
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.select();
+  }
+
+  const handleChange = (e: React.FormEvent<HTMLInputElement>) => {
+    const search = e.currentTarget.value;
+    setCurrentSearch(search);
+  }
+
   const handleClose = (e: React.MouseEvent) => {
     e.preventDefault();
     showSelf(false);
@@ -38,22 +49,23 @@ const InviteGroupMembers = ({ showSelf, ...props }: Props) => {
         <div className="invite-members">
           <h2 className="thin-yellow-font">Invite Members to {props.roomName}</h2>
           <div className="search-invite-friends">
-            <input autoComplete="off" placeholder="Search by Username"/>
+            <input onChange={handleChange} autoComplete="off" placeholder="Search by Username"/>
             <MdSearch />
           </div>
-          {/* Scrollable. Each Item has a button to send an invite link to. After it is clicked, the whole item turns green */}
           <div className="friends-invite-list">
-            {/* <div className="search-invite-friends">
-              <input autoComplete="off" placeholder="some text"/>
-              <MdSearch />
-            </div> */}
-            {friends.map((friend) => 
-              <InviteFriendItem key={friend.id} id={friend.id} username={friend.username}/>
+            {friends
+              .filter((friend) => (currentSearch === "") || (friend.username.startsWith(currentSearch)))
+              .map((friend) => 
+              <InviteFriendItem 
+                key={friend.id} 
+                id={friend.id} 
+                username={friend.username} />
             )}
           </div>
           <p>Or send them the room ID</p>
           <div className="room-id-copy">
-            <p>{props.roomId}</p>
+            {/* <p>{props.roomId}</p> */}
+            <input onFocus={handleFocus} value={props.roomId} readOnly/>
             <button title="Copy ID" onClick={() => {navigator.clipboard.writeText(props.roomId.toString())}}>
               <MdContentCopy />
             </button>

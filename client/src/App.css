@@ -1035,7 +1035,7 @@ header nav ul li a {
 }
 
 .modal-input button {
-    border-radius: 4px;
+    border-radius: 0 8px 8px 0;
     border: 1px solid var(--dark-desaturated-blue);
     /* height: 40px; */
     height: 100%;
@@ -1197,8 +1197,15 @@ header nav ul li a {
     margin-top: 24px;
 }
 
-.room-id-copy p {
+.room-id-copy input {
     padding: 16px 0 16px 32px;
+    border-radius: 8px 0 0 8px;
+    border: none;
+    font-size: 16px;
+    color: var(--off-white);
+    background: none;
+    outline: none;
+    caret-color: var(--off-white);
 }
 
 .room-id-copy button {
@@ -1441,6 +1448,152 @@ header nav ul li a {
 .join-cancel:hover {
     color: var(--red);
     border: 1px solid var(--red);
+}
+
+/* Button background */
+.add-group-chat-toggle {
+    position: relative;
+    padding: 8px 12px;
+    background-color: var(--black);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* font-size: 16px; */
+}
+
+/* Toggle Slider */
+.add-group-chat-toggle::before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: calc(50% - 5px);
+    height: calc(100% - 10px);
+    background: linear-gradient(320deg, var(--primary), var(--primary-variant));
+    background-color: linear;
+    border-radius: 3px;
+    transition: 0.3s;
+}
+
+/* Slider position when toggled */
+.toggle-join .add-group-chat-toggle::before {
+    transform: translate(100%);
+}
+
+/* Slider text */
+.add-group-chat-toggle span {
+    position: relative;
+    padding: 10px;
+    color: var(--off-white);
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.add-group-chat-toggle span.dark {
+    color: var(--black);
+}
+
+.add-group-chat-toggle span.light {
+    color: var(--off-white);
+}
+
+/* Parent element of button */
+.toggle-wrapper {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.join-group-chat-prompt {
+    padding: 0 16px;
+    display: grid;
+    margin-top: 24px;
+    row-gap: 24px;
+}
+
+.add-group-chat {
+    transition: height 150ms ease-in-out;
+}
+
+
+.create-group-chat {
+    padding: 0 16px 16px 16px;
+    margin-top: 24px;
+    display: grid;
+    flex-direction: column;
+    /* row-gap: 24px; */
+    align-items: center;
+    justify-items: stretch;
+}
+
+.server-image-upload {
+    display: grid;
+    grid-template-rows: 1fr 0;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    height: 140px;
+    width: 140px;
+    border-radius: 50%;
+    border: 2px dashed var(--off-white);
+    padding: 1em;
+    justify-self: center;
+    cursor: pointer;
+}
+
+.server-image-upload:hover {
+    background-color: var(--dark-desaturated-blue);
+}
+
+.server-image-upload input {
+    display: none;
+}
+
+.server-name-text {
+    justify-self: start;
+    margin: 24px 0 6px 16px;
+}
+
+.server-name {
+    border: none;
+    background: var(--dark-desaturated-blue);
+    color: var(--off-white);
+    border-radius: 8px;
+    /* padding: 16px 32px; */
+    padding: 16px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    /* font-weight: bold; */
+    /* text-align: center; */
+    width: 100%;
+    outline: none;
+    margin-bottom: 24px;
+    /* font-family: 'Montserrat'; */
+}
+
+.create-group-chat button {
+    background: linear-gradient(320deg, var(--primary), var(--primary-variant));
+    border: none;
+    border-radius: 4px;
+    justify-self: center;
+    padding: 16px 32px;
+}
+
+.server-image-icon {
+    position: relative;
+    /* display: none; */
+    bottom: 10px;
+    left: 60px;
+    font-size: 1.8em;
+    background-color: var(--dark-desaturated-blue);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @media (max-width: 1300px) {

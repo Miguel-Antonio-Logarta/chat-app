@@ -1,6 +1,14 @@
+import enum
+from sqlalchemy import Enum
 from sqlalchemy import BigInteger, Boolean, Column, ForeignKey, Integer, String, Date, TIMESTAMP
 from sqlalchemy.sql.expression import text
 from database import Base
+
+
+class FriendStatus(enum.Enum):
+    ACCEPTED = 1
+    PENDING = 2
+    REJECTED = 3
 
 class User(Base):
     __tablename__ = "User"
@@ -54,13 +62,10 @@ class OnlineUser(Base):
     id = Column(BigInteger, primary_key=True, index=True)
     user_id = Column(BigInteger, ForeignKey("User.id"), unique=True, nullable=False)
     current_room_id = Column(BigInteger, ForeignKey("Room.id"), nullable=True)
-    # room_id = Column()
 
-# TODO: Add a friends table for friend requests
-# class Friend(Base):
-#     __tablename__ = "Friend"
-#     id = Column(BigInteger, primary_key=True, index=True)
-#     user_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
-#     friend_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
-#     # Status for whether friend request is accepted, rejected, pending, or deleted
-#     status = Column(Integer, nullable=False, default="0")
+class Friend(Base):
+    __tablename__ = "Friend"
+    id = Column(BigInteger, primary_key=True, nullable=False, index=True)
+    user_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
+    friend_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
+    status = Column(Enum(FriendStatus), nullable=False)
