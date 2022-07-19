@@ -3,14 +3,11 @@ import { AiOutlineUsergroupAdd } from "react-icons/ai"
 import { MdOutlineGroups } from "react-icons/md"
 import { BsChatDots } from "react-icons/bs"
 import GroupChatList from './GroupChatList';
-import Modal from './Modal';
 import FriendList from './FriendList';
 import FriendRequests from './FriendRequests';
 
 type LeftHandMenuProps = {}
-type samplePromptProps = {
-  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
-}
+
 enum CurrentList {
   GroupChats,
   FriendList,

@@ -85,7 +85,7 @@ class WSDataReceive(BaseModel):
 
 class CreateRoom(BaseModel):
     name: str
-    is_group_chat: bool = False
+    # is_group_chat: bool = False
 
     @validator('name')
     def check_name_length(cls, v):
@@ -94,14 +94,17 @@ class CreateRoom(BaseModel):
         else:
             return v
 
-class LeaveRoom(BaseModel):
+class Room(BaseModel):
     room_id: int
 
-class JoinRoom(BaseModel):
-    room_id: int
+# class LeaveRoom(BaseModel):
+#     room_id: int
 
-class GetMessages(BaseModel):
-    room_id: int
+# class JoinRoom(BaseModel):
+#     room_id: int
 
-class GetRoomInfo(BaseModel):
-    room_id: int
+# class GetMessages(BaseModel):
+#     room_id: int
+
+# class GetRoomInfo(BaseModel):
+#     room_id: int

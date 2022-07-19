@@ -43,7 +43,7 @@ const SocketProvider = ({children, ...props}: SocketProviderProps) => {
                 
             ws.addEventListener('close', event => {
                 setConnected(false);
-                setTimeout(connect, 5000);
+                // setTimeout(connect, 5000);
                 // Check why server closed the connection
                 // If the token we sent was not valid, log us out
                 // console.log(event);

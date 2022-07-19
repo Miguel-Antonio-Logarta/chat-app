@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { MdClose, MdContentCopy, MdSearch } from "react-icons/md";
-import Modal from "./Modal";
-import {friends} from "../data/testData";
+import {friends} from "../../data/testData";
+import Modal from "../Modal";
 
 type Props = {
   showSelf: React.Dispatch<React.SetStateAction<boolean>>;

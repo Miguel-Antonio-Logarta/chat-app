@@ -8,26 +8,32 @@ import AuthProvider from './context/AuthContext';
 import ChatRoom from './pages/ChatRoom';
 import SocketProvider from './context/SocketContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { ChatAppContextProvider } from './context/ChatAppContext';
+import BetterSocketProvider from './context/BetterSocketContext';
 // import WSProvider from './components/WSContext';
 
 function App() {
   return (
       <AuthProvider>
         <SocketProvider>
-            <div className="App">
-              <Routes>
-                <Route index element={<Navigate to="home" />} />
-                <Route path="login" element={<Login />} />
-                <Route path="signUp" element={<SignUp />} />
-                <Route path="home" element={
-                  <ProtectedRoute>
-                    <ChatRoom />
-                  </ProtectedRoute>
-                } >
-                </Route>
-                <Route path="*" element={<NotFound  />} />
-              </Routes>
-            </div>
+          <BetterSocketProvider>
+          <ChatAppContextProvider>
+              <div className="App">
+                <Routes>
+                  <Route index element={<Navigate to="home" />} />
+                  <Route path="login" element={<Login />} />
+                  <Route path="signUp" element={<SignUp />} />
+                  <Route path="home" element={
+                    <ProtectedRoute>
+                      <ChatRoom />
+                    </ProtectedRoute>
+                  } >
+                  </Route>
+                  <Route path="*" element={<NotFound  />} />
+                </Routes>
+              </div>
+          </ChatAppContextProvider>
+          </BetterSocketProvider>
         </SocketProvider>
       </AuthProvider>
   );

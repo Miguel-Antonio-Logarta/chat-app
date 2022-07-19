@@ -7,6 +7,7 @@ import schemas
 from database import get_db
 import models
 import config
+from auth import get_current_user
 
 router = APIRouter()
 
@@ -58,6 +59,20 @@ async def login_for_access_token(credentials: schemas.LoginUser, db: Session = D
         raise credentials_exception
 
     # Give token
+    access_token_expires = timedelta(minutes=config.settings.access_token_expire_minutes)
+    access_token = auth.create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_id": user.id,
+        "username": user.username,
+    }
+
+@router.post("/users/login/token", response_model=schemas.Token)
+async def get_new_token(user: models.User = Depends(get_current_user)):
     access_token_expires = timedelta(minutes=config.settings.access_token_expire_minutes)
     access_token = auth.create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires

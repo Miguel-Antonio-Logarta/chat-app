@@ -1,7 +1,7 @@
 import React from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { MdClose } from 'react-icons/md';
-import Modal from './Modal';
+import Modal from '../Modal';
 
 type Props = {
     showSelf: any;

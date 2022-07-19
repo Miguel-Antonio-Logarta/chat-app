@@ -8,6 +8,7 @@ from database import get_db
 from auth import ws_get_current_user
 import chat_events
 from connection_manager import ConnectionManager
+# from server.chat_events import get_group_chats
 
 router = APIRouter()
 manager = ConnectionManager()
@@ -35,24 +36,29 @@ async def websocket_endpoint(
                 #     await chat_events.pong(websocket, manager)
                 case "SEND_MESSAGE":
                     message = schemas.SendMessage(**parsed_data.payload)
-                    await chat_events.ws_send_message(websocket, message, user, db, manager)
+                    await chat_events.send_message(websocket, message, user, db, manager)
                 case "GET_MESSAGES":
-                    room = schemas.GetMessages(**parsed_data.payload)
-                    await chat_events.ws_get_messages(websocket, room, user, db, manager)
+                    room = schemas.Room(**parsed_data.payload)
+                    await chat_events.get_messages(websocket, room, user, db, manager)
                 case "CREATE_ROOM":
                     new_room = schemas.CreateRoom(**parsed_data.payload)
-                    await chat_events.ws_create_room(websocket, new_room, user, db, manager)
+                    await chat_events.create_room(websocket, new_room, user, db, manager)
                 case "LEAVE_ROOM":
-                    room = schemas.LeaveRoom(**parsed_data.payload)
-                    await chat_events.ws_leave_room(websocket, room, user, db, manager)
+                    room = schemas.Room(**parsed_data.payload)
+                    await chat_events.leave_room(websocket, room, user, db, manager)
                 case "JOIN_ROOM":
-                    room = schemas.JoinRoom(**parsed_data.payload)
-                    await chat_events.ws_join_room(websocket, room, user, db, manager)
+                    room = schemas.Room(**parsed_data.payload)
+                    await chat_events.join_room(websocket, room, user, db, manager)
                 case "GET_ROOMS":
-                    await chat_events.ws_get_rooms(websocket, user, db, manager)
+                    await chat_events.get_rooms(websocket, user, db, manager)
                 case "GET_ROOM_INFO":
-                    room = schemas.GetRoomInfo(**parsed_data.payload)
-                    await chat_events.ws_get_room_info(websocket, room, user, db, manager)
+                    room = schemas.Room(**parsed_data.payload)
+                    await chat_events.get_room_info(websocket, room, user, db, manager)
+                case "GET_GROUP_CHAT_INFO":
+                    room = schemas.Room(**parsed_data.payload)
+                    await chat_events.get_group_chat_info(websocket, room, user, db, manager)
+                case "GET_GROUP_CHATS":
+                    await chat_events.get_group_chats(websocket, user, db, manager)
                 case _:
                     await websocket.send_json({"type": "NOT_FOUND", "payload": "No matching event"})
 

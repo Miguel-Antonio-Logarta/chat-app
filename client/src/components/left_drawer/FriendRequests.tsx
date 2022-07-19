@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import AddFriend from "./AddFriend";
-import { friends } from "../data/testData"
+import { friends } from "../../data/testData"
 import { MdCheck, MdClose } from "react-icons/md";
 
 type Props = {};

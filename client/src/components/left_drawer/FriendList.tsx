@@ -1,6 +1,6 @@
 import React from "react";
 import { AiOutlinePlus } from "react-icons/ai";
-import { friends } from "../data/testData";
+import { friends } from "../../data/testData";
 
 type Props = {};
 type FriendProps = {
