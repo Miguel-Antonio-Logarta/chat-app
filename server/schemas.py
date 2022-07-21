@@ -108,3 +108,9 @@ class Room(BaseModel):
 
 # class GetRoomInfo(BaseModel):
 #     room_id: int
+class InviteToGroupChat(BaseModel):
+    friend_id: int
+    room_id: int
+
+class Friend(BaseModel):
+    friend_id: int

@@ -1,49 +1,10 @@
-from requests import session
 import models
 import schemas
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
-from typing import List
-import json
 from fastapi import WebSocket
 from connection_manager import ConnectionManager
-
-async def pong(websocket: WebSocket, manager: ConnectionManager):
-    print(f'ping recieved from {websocket}')
-    await manager.send_personal_message(websocket, {
-        "type": "PONG",
-        "payload": {}
-    })
-
-async def send_message(websocket: WebSocket, message: schemas.SendMessage, user: models.User, db: Session, manager: ConnectionManager):
-    """Sends a message to a room"""
-    # Check if user belongs to the room. Finds a participant that matches the room id, and sees if the user id matches that of the user
-    valid_room = db.query(models.Participant).filter(models.Participant.room_id == message.room_id, models.Participant.user_id == user.id).first()
-    if valid_room is None:
-        await manager.send_personal_message({
-            "type": "ERORR", 
-            "payload": {
-                "message": "User is not a member of this room",
-                "room_id": message.room_id
-            }
-        })
-
-    # Store message in database
-    db_message = models.Message(**message.dict(), user_id=user.id)
-    db.add(db_message)
-    db.commit()
-    db.refresh(db_message)
-
-    # Send everyone in the room the new message
-    await manager.emit({
-            "type": "SEND_MESSAGE",
-            "payload": {
-                "id": db_message.id,
-                "username": user.username,
-                "message": db_message.message,
-                "timestamp": db_message.created_on.isoformat()
-            }
-        }, message.room_id, db)
+from errors import WebSocketEventException
 
 async def get_group_chats(websocket: WebSocket, user: models.User, db: Session, manager: ConnectionManager):
     """Gets user group chats"""
@@ -65,9 +26,6 @@ async def get_group_chats(websocket: WebSocket, user: models.User, db: Session, 
         "type": "GET_GROUP_CHATS",
         "payload": rooms_out
     })
-
-async def get_friend_dms():
-    """Gets Friend DMs"""
 
 async def get_rooms(websocket: WebSocket, user: models.User, db: Session, manager: ConnectionManager):
     """Gets all rooms that the user is a part of"""
@@ -91,8 +49,8 @@ async def get_rooms(websocket: WebSocket, user: models.User, db: Session, manage
         "payload": rooms_out
     })
 
-async def create_room(websocket: WebSocket, new_room: schemas.CreateRoom, user: models.User, db: Session, manager: ConnectionManager):
-    """Creates a room with user as the participant"""
+async def create_group_chat(websocket: WebSocket, new_room: schemas.CreateRoom, user: models.User, db: Session, manager: ConnectionManager):
+    """Creates a group chat with user as the participant"""
     # Create a room
     db_room = models.Room(**new_room.dict(), is_group_chat=True)
     db.add(db_room)
@@ -109,7 +67,7 @@ async def create_room(websocket: WebSocket, new_room: schemas.CreateRoom, user: 
 
     # Send back group chat
     await manager.send_personal_message(websocket, {
-        "type": "CREATE_ROOM",
+        "type": "CREATE_GROUP_CHAT",
         "payload": {
             "room_id": db_room.id,
             "is_group_chat": db_room.is_group_chat,
@@ -118,17 +76,20 @@ async def create_room(websocket: WebSocket, new_room: schemas.CreateRoom, user: 
         }
     })
 
-async def join_room(websocket: WebSocket, room: schemas.Room, user: models.User, db: Session, manager: ConnectionManager):
-    """Joins a room with an id"""
+async def confirm_join_group_chat(websocket: WebSocket, room: schemas.Room, user: models.User, db: Session, manager: ConnectionManager):
+    """Joins a group chat with an id"""
     # Find room and check if it exists and if it is a group chat
     db_room = db.query(models.Room).filter(models.Room.id == room.room_id, models.Room.is_group_chat == True).first()
-    if db_room is None:
-        await manager.send_personal_message(websocket, {
-            "type": "ERORR", 
-            "payload": {
-                "message": "Group chat does not exist",
+    if db_room is None or db_room.is_group_chat is False:
+        raise WebSocketEventException("CONFIRM_JOIN_GROUP_CHAT", "Group chat does not exist", {
                 "room_id": room.room_id
-            }
+        })
+    
+    participant_already_exists = db.query(models.Participant).filter(models.Participant.room_id == room.room_id).first()
+    if participant_already_exists:
+        raise WebSocketEventException("CONFIRM_JOIN_GROUP_CHAT", f"You are already a member of {db_room.name}", {
+            "room_id": room.room_id,
+            "room_name" : room.name
         })
     
     # Add participant with room_id and user_id
@@ -161,9 +122,8 @@ async def join_room(websocket: WebSocket, room: schemas.Room, user: models.User,
         }
     }, room.room_id, db)
 
-async def leave_room(websocket: WebSocket, room: schemas.Room, user: models.User, db: Session, manager: ConnectionManager):
+async def leave_group_chat(websocket: WebSocket, room: schemas.Room, user: models.User, db: Session, manager: ConnectionManager):
     """Leaves a room"""
-    print("Leaving a room")
     # def leave_room(...):
     #   Check if user belongs to room
     #   Check if it is a group chat. Because you can only leave a room if it is a group chat
@@ -175,33 +135,19 @@ async def leave_room(websocket: WebSocket, room: schemas.Room, user: models.User
     db_participant_query = db.query(models.Participant).filter(models.Participant.room_id == room.room_id, models.Participant.user_id == user.id)
     db_participant = db_participant_query.first()
     if db_participant is None:
-        await manager.send_personal_message(websocket, {
-            "type": "ERORR", 
-            "payload": {
-                "message": "User is not in group chat",
-                "room_id": room.room_id
-            }
-        })
-        return
+        raise WebSocketEventException("LEAVE_GROUP_CHAT", "User is not in group chat", {"room_id": room.room_id})
     
     # Check if room is a group chat, because you can only leave a room if it is a group chat
     db_room = db.query(models.Room).filter(models.Room.id == room.room_id).first()
     if not db_room.is_group_chat:
-        await manager.send_personal_message(websocket, {
-            "type": "ERORR", 
-            "payload": {
-                "message": "Can't leave a room that is not a group chat",
-                "room_id": room.room_id
-            }
-        })
-        return
+        raise WebSocketEventException("LEAVE_GROUP_CHAT", "Can't leave a room that is not a group chat", {"room_id": room.room_id})
 
     # Delete participant on success
     db_participant_query.delete(synchronize_session=False)
     db.commit()
 
     await manager.send_personal_message(websocket, {
-        "type": "LEAVE_ROOM",
+        "type": "LEAVE_GROUP_CHAT",
         "payload": {
             "message": "Successfully left room",
             "room_id": room.room_id
@@ -217,43 +163,63 @@ async def leave_room(websocket: WebSocket, room: schemas.Room, user: models.User
         }
     }, room.room_id, db)
 
-async def send_friend_request():
-    """Sends a friend request"""
-    pass
-
-async def accept_friend_request():
-    """Accepts a friend request"""
-    pass
-
-async def reject_friend_request():
-    """Rejects a friend request"""
-
-async def invite_friend():
+async def invite_friend_to_group_chat(websocket: WebSocket, invite: schemas.InviteToGroupChat, user: models.User, db: Session, manager: ConnectionManager):
     """Invites a friend to a room. User must belong to the room to invite friend"""
-    pass
+    # Check if user belongs to a room
+    belongs_to_room = db.query(models.Participant).filter(models.Participant.user_id == user.id, models.Participant.room_id == invite.room_id).first()
+    if belongs_to_room is None:
+        raise WebSocketEventException("INVITE_TO_GROUP_CHAT", "You are not a member of this group chat", {
+            "friend_id": invite.friend_id, 
+            "room_id": invite.room_id
+            })
 
-async def get_messages(websocket: WebSocket, room: schemas.Room, user: models.User, db: Session, manager: ConnectionManager):
-    """Gets all messages from a room"""
-    db_room = db.query(models.Room).filter(models.Room.id == room.room_id).first()
-    if db_room is None:
-        # Send an error back
-        pass
+    # Check if room is a group chat
+    room = db.query(models.Room).filter(models.Room.id == invite.room_id).first()
+    if room.is_group_chat == False:
+        raise WebSocketEventException("INVITE_TO_GROUP_CHAT", "You cannot invite a member into this chat", {
+            "friend_id": invite.friend_id, 
+            "room_id": invite.room_id
+            })
 
-    query = db.query(models.Message, models.User).filter(and_(models.Message.room_id == room.room_id, models.Message.user_id == models.User.id)).order_by(models.Message.created_on.asc()).all()
-    messages_out: List[schemas.SendMessage] = []
-    for db_message, db_user in query:
-        messages_out.append({
-            "id": db_message.id,
-            "username": db_user.username,
-            "message": db_message.message,
-            "timestamp": db_message.created_on.isoformat()
-        })
-    await manager.send_personal_message(websocket, {
-        "type": "GET_MESSAGES",
+    # Check if friend exists
+    friend = db.query(models.Friend).filter((models.Friend.user_id == user.id) | (models.Friend.friend_id == user.id)).first()
+    if friend is None:
+        raise WebSocketEventException("INVITE_TO_GROUP_CHAT", "You are not friends", {
+            "friend_id": invite.friend_id, 
+            "room_id": invite.room_id
+            })
+
+    # Check if they are part of the group chat
+    is_participant = db.query(models.Participant).filter(models.Participant.user_id == invite.friend_id, models.Participant.room_id == invite.room_id).first()
+    if is_participant is not None:
+        raise WebSocketEventException("INVITE_TO_GROUP_CHAT", "This user is already a member of this group chat", {
+            "friend_id": invite.friend_id, 
+            "room_id": invite.room_id
+            })
+
+    # Add friend to group chat
+    new_member = models.Participant(user_id=invite.friend_id, room_id=invite.room_id)
+    db.add(new_member)
+    db.commit()
+    db.refresh(new_member)
+
+    await manager.send_personal_message({
+        "type": "INVITE_TO_GROUP_CHAT",
         "payload": {
-            "room_name": db_room.name,
-            "room_id": room.room_id,
-            "messages": messages_out
+            "message": "Successfully added friend to group chat",
+            "friend_id": new_member.user_id,
+            "room_id": new_member.room_id
+        }
+    })
+
+    await manager.send_message_to([new_member.user_id], {
+        "type": "INVITED_TO_GROUP_CHAT",
+        "payload": {
+            "message": f"You were invited to {room.name}",
+            "room_id": room.id,
+            "name": room.name,
+            "is_group_chat": room.is_group_chat,
+            "created_on": room.created_on.isoformat()
         }
     })
 
@@ -295,41 +261,27 @@ async def get_room_info(websocket: WebSocket, room: schemas.Room, user: models.U
     })
 
 
-async def get_group_chat_info(websocket: WebSocket, room: schemas.Room, user: models.User, db: Session, manager: ConnectionManager):
-    """Gets room name, ID, and number of members"""
+async def join_group_chat(websocket: WebSocket, room: schemas.Room, user: models.User, db: Session, manager: ConnectionManager):
+    """Previews room name, ID, and number of members for user before joining"""
     current_room = db.query(models.Room).filter(models.Room.id == room.room_id).first()
+    if current_room is None or current_room.is_group_chat is False:
+        raise WebSocketEventException("JOIN_GROUP_CHAT", "Sorry, this group chat does not exist", {"room_id": room.room_id})
     
-    if current_room is None:
-        await manager.send_personal_message(websocket, {
-            "type": "GET_GROUP_CHAT_INFO",
-            "payload": {
-                "message": "Sorry, this group chat does not exist",
-                "room_id": room.room_id,
-                "exists": False
-            }
+    participant_already_exists = db.query(models.Participant).filter(models.Participant.room_id == current_room.id).first()
+    if participant_already_exists:
+        raise WebSocketEventException("JOIN_GROUP_CHAT", f"You are already a member of {current_room.name}", {
+            "room_id": current_room.id,
+            "room_name" : current_room.name
         })
-        return
-
+    
     all_members = db.query(models.Participant).filter(models.Participant.room_id == room.room_id).count()
 
     await manager.send_personal_message(websocket, {
-        "type": "GET_GROUP_CHAT_INFO",
+        "type": "JOIN_GROUP_CHAT",
         "payload": {
             "room_id": current_room.id,
             "room_name": current_room.name,
             "is_group_chat": current_room.is_group_chat,
-            "member_count": all_members,
-            "exists": True
+            "member_count": all_members
         }
     })
-# Get all rooms
-# Create Room DONE
-# Leave Room DONE
-# Add friend
-# Accept / Room Invite
-# Accept / friend request
-# Remove friend
-# Invite friend
-# Send message
-# Is typing
-# Mark message as read

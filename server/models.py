@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Enum
+from sqlalchemy import Enum, UniqueConstraint
 from sqlalchemy import BigInteger, Boolean, Column, ForeignKey, Integer, String, Date, TIMESTAMP
 from sqlalchemy.sql.expression import text
 from database import Base
@@ -56,6 +56,7 @@ class Participant(Base):
         nullable=False,
         server_default=text('now()')
     )
+    __table_args__ = (UniqueConstraint('room_id', 'user_id', name="unique_user_per_room"),)
 
 class OnlineUser(Base):
     __tablename__ = "OnlineUser"
@@ -69,3 +70,9 @@ class Friend(Base):
     user_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
     friend_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
     status = Column(Enum(FriendStatus), nullable=False)
+    created_on = Column(
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=text('now()')
+    )
+    __table_args__ = (UniqueConstraint('user_id', 'friend_id', name="unique_one_friend_request_per_user"),)

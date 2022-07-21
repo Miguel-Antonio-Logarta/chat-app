@@ -8,6 +8,7 @@ from database import get_db
 from auth import ws_get_current_user
 import chat_events
 from connection_manager import ConnectionManager
+from errors import WebSocketEventException
 # from server.chat_events import get_group_chats
 
 router = APIRouter()
@@ -40,28 +41,49 @@ async def websocket_endpoint(
                 case "GET_MESSAGES":
                     room = schemas.Room(**parsed_data.payload)
                     await chat_events.get_messages(websocket, room, user, db, manager)
-                case "CREATE_ROOM":
-                    new_room = schemas.CreateRoom(**parsed_data.payload)
-                    await chat_events.create_room(websocket, new_room, user, db, manager)
-                case "LEAVE_ROOM":
-                    room = schemas.Room(**parsed_data.payload)
-                    await chat_events.leave_room(websocket, room, user, db, manager)
-                case "JOIN_ROOM":
-                    room = schemas.Room(**parsed_data.payload)
-                    await chat_events.join_room(websocket, room, user, db, manager)
                 case "GET_ROOMS":
                     await chat_events.get_rooms(websocket, user, db, manager)
                 case "GET_ROOM_INFO":
                     room = schemas.Room(**parsed_data.payload)
                     await chat_events.get_room_info(websocket, room, user, db, manager)
-                case "GET_GROUP_CHAT_INFO":
-                    room = schemas.Room(**parsed_data.payload)
-                    await chat_events.get_group_chat_info(websocket, room, user, db, manager)
                 case "GET_GROUP_CHATS":
                     await chat_events.get_group_chats(websocket, user, db, manager)
+                case "CREATE_GROUP_CHAT":
+                    new_room = schemas.CreateRoom(**parsed_data.payload)
+                    await chat_events.create_group_chat(websocket, new_room, user, db, manager)
+                case "LEAVE_GROUP_CHAT":
+                    room = schemas.Room(**parsed_data.payload)
+                    await chat_events.leave_group_chat(websocket, room, user, db, manager)
+                case "JOIN_GROUP_CHAT":
+                    room = schemas.Room(**parsed_data.payload)
+                    await chat_events.join_group_chat(websocket, room, user, db, manager)
+                case "CONFIRM_JOIN_GROUP_CHAT":
+                    room = schemas.Room(**parsed_data.payload)
+                    await chat_events.confirm_join_group_chat(websocket, room, user, db, manager)
+                case "INVITE_TO_GROUP_CHAT":
+                    invite = schemas.InviteToGroupChat(**parsed_data.payload)
+                    await chat_events.invite_friend_to_group_chat(websocket, invite, user, db, manager)
+                case "GET_FRIENDS":
+                    await chat_events.get_friends(websocket, user, db, manager)
+                case "SEND_FRIEND_REQUEST":
+                    friend = schemas.Friend(**parsed_data.payload)
+                    await chat_events.send_friend_request(websocket, friend, user, db, manager)
+                case "CONFIRM_SEND_FRIEND_REQUEST":
+                    friend = schemas.Friend(**parsed_data.payload)
+                    await chat_events.confirm_send_friend_request(websocket, friend, user, db, manager)
+                case "ACCEPT_FRIEND_REQUEST":
+                    friend = schemas.Friend(**parsed_data.payload)
+                    await chat_events.accept_friend_request(websocket, friend, user, db, manager)
+                case "REJECT_FRIEND_REQUEST":
+                    friend = schemas.Friend(**parsed_data.payload)
+                    await chat_events.reject_friend_request(websocket, friend, user, db, manager)
                 case _:
                     await websocket.send_json({"type": "NOT_FOUND", "payload": "No matching event"})
-
+        except WebSocketEventException as err:
+            await manager.send_personal_message(websocket, {
+                "type": "ERROR",
+                "payload": err.as_payload()
+            })
         except ValidationError as err:
             await manager.send_personal_message(websocket, {
                 "type": "ERROR",

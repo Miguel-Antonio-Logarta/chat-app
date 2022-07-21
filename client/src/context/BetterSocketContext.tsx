@@ -33,20 +33,21 @@ export const useBetterSocket = () => useContext(BetterSocketContext);
 export const BetterSocketProvider = ({children}: BetterSocketProviderProps) => {
     const {authenticated} = useAuth();
     const [cookies] = useCookies(['token']);
-    // rws = null!;
     const eventListeners: Map<string, Array<Function>> = new Map();
+    // const errorListeners: Map<string, Array<Function>> = new Map();
     let rws: ReconnectingWebSocket = new ReconnectingWebSocket(`${process.env.REACT_APP_WS}?token=${cookies.token}`, [], options);
 
     const on = (eventType: string, f: (payload: unknown) => void): Function => {
         // Adds event listener to socket.
+        console.table(eventListeners);
         const eventListener = eventListeners.get(eventType);
         if (eventListener) {
             eventListener.push(f);
-            console.log(f);
+            // console.log(f);
             return () => eventListener.filter((callback) => callback !== f);
         } else {
             eventListeners.set(eventType, [f]);
-            console.log(f);
+            // console.log(f);
             return () => eventListeners.get(eventType)!.filter((callback) => callback !== f);
         }
     }
@@ -57,6 +58,7 @@ export const BetterSocketProvider = ({children}: BetterSocketProviderProps) => {
         if (eventListener) {
             eventListeners.set(eventType, eventListener.filter((callback) => callback !== f));
         }
+        console.table(eventListeners);
     }
 
     const sendMessage = (eventType: string, payload: any) => {
@@ -70,24 +72,25 @@ export const BetterSocketProvider = ({children}: BetterSocketProviderProps) => {
         rws = new ReconnectingWebSocket(`${process.env.REACT_APP_WS}?token=${cookies.token}`);
         
         rws.addEventListener('open', (event) => {
-            console.log(event);
+            console.log("open: ", event);
         })
 
         rws.addEventListener('message', (event) => {
             const data = camelCaseKeys(JSON.parse(event.data));
             const eventListener = eventListeners.get(data.type);
-            console.log("Message event", data);
+            console.log("Message: ", data);
             if (eventListener) {
                 eventListener.forEach((callback) => callback(data.payload));
             }
         })
 
         rws.addEventListener('close', (event) => {
-            console.log(event);
+            console.log("closing: ", event);
+            // console.log(event);
         })
 
         rws.addEventListener('error', (event) => {
-            console.log(event);
+            console.log("error: ", event);
         })
     }
 

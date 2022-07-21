@@ -1,32 +1,7 @@
 from fastapi import WebSocket
-from typing import List
-import json
-from sqlalchemy import and_
 from sqlalchemy.orm import Session
 import models
-# Three ways to store connected users
-# Hash table with rooms as keys
-    # {1:{user1, user2, user3...}, 4:{user5,user8, user4},...}} O(1) room lookup time and we can iterate over keys. 
-    # Only issue is removing websocket from a connection since we might not know where the websocket connection is
-# Set of ConnectedUser(s)...
-    # Instant websocket lookup time O(1).
-    # We might have to iterate through every element in set to find connected user that belongs to a room
-# Using an OnlineUsers table.  
-    # This is good so that we can maintain connections upon server restart
-# Combination: Use a hashtable with username as key and websocket as value. Query 'Participants' table to find users that are in a room
-    # online_users = {'user1': websocket1, 'user2': websocket2....}
-    # room_participants = db.query(models.Participants).filter(models.Participants.room_id == room_id).all()
-    # for member in room_pariticpants:
-    #   try:
-    #       online_users[member.username].send_text({"type": "SEND_MESSAGE", "payload": message})
-    #   except KeyError:
-    #       continue
-# Combination: Use an OnlineUsers table.
-    # When sending message, it sends to all online users who belong to the room the sender is in
-        # If a user is not currently in that room, send a notification instead.
-    #
-# Combination: Hash table with rooms as keys. The values are also hash tables, but with user ids as keys and websockets as values
-    # {'room_id': {'user1', websocket}}
+
 class ConnectedUser:
     def __init__(self, websocket: WebSocket, room: int | None = None):
         # Contains room id and websocket
@@ -87,6 +62,15 @@ class ConnectionManager:
                     models.OnlineUser.user_id == models.Participant.user_id
                 ).all()
         for user_id in online_participants:
+            print(user_id)
+            try:
+                await self.active_connections[user_id].send_json(message)
+            except KeyError as ke:
+                print('KeyError: ', ke)
+
+    async def send_message_to(self, users: list[int], message: dict):
+        """Messages all users with specified user ids"""
+        for user_id in users:
             print(user_id)
             try:
                 await self.active_connections[user_id].send_json(message)
