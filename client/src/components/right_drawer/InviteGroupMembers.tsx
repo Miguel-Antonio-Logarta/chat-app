@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdClose, MdContentCopy, MdSearch } from "react-icons/md";
+import { useChat } from "../../context/ChatAppContext";
 import {friends} from "../../data/testData";
 import Modal from "../Modal";
 
@@ -14,6 +15,11 @@ type InviteFriendItemProps = {
   username: string;
 }
 
+type FriendType = {
+  userId: number;
+  username: string;
+}
+
 const InviteFriendItem = (props: InviteFriendItemProps) => {
   return (
     <div className="friend-invite">
@@ -25,7 +31,9 @@ const InviteFriendItem = (props: InviteFriendItemProps) => {
 }
 const InviteGroupMembers = ({ showSelf, ...props }: Props) => {
   const [currentSearch, setCurrentSearch] = useState("");
-
+  const { friends, currentChatRoom } = useChat();
+  const [canInvite, setCanInvite] = useState<FriendType[]>([]);
+  
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     e.target.select();
   }
@@ -40,6 +48,24 @@ const InviteGroupMembers = ({ showSelf, ...props }: Props) => {
     showSelf(false);
   };
 
+  useEffect(() => {
+    const getPotentialInvites = () => {
+      if (currentChatRoom) {
+        const allMembers = [...currentChatRoom.onlineUsers, ...currentChatRoom.offlineUsers];
+        console.log("members", allMembers);
+        // Can invite includes friends that are not in the group chat
+        console.log("friends", friends);
+        const canInvite = friends.filter((friend) => allMembers.some((already_invited) => already_invited.userId === friend.userId ));
+        console.log("can invite", canInvite);
+        return canInvite;
+      } else {
+        return [];
+      }
+    }
+
+    setCanInvite(getPotentialInvites());
+  }, [currentChatRoom, friends])
+
   return (
     <Modal onClose={handleClose}>
       <div onMouseDown={(e) => e.stopPropagation()} className="invite-members-background">
@@ -53,18 +79,17 @@ const InviteGroupMembers = ({ showSelf, ...props }: Props) => {
             <MdSearch />
           </div>
           <div className="friends-invite-list">
-            {friends
+            {canInvite
               .filter((friend) => (currentSearch === "") || (friend.username.startsWith(currentSearch)))
               .map((friend) => 
               <InviteFriendItem 
-                key={friend.id} 
-                id={friend.id} 
+                key={friend.userId} 
+                id={friend.userId} 
                 username={friend.username} />
             )}
           </div>
           <p>Or send them the room ID</p>
           <div className="room-id-copy">
-            {/* <p>{props.roomId}</p> */}
             <input onFocus={handleFocus} value={props.roomId} readOnly/>
             <button title="Copy ID" onClick={() => {navigator.clipboard.writeText(props.roomId.toString())}}>
               <MdContentCopy />

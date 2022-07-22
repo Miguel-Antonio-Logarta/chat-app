@@ -3,8 +3,6 @@ import React, { useCallback, useEffect } from "react";
 import { MdClose } from "react-icons/md";
 import { useBetterSocket } from "../../context/BetterSocketContext";
 import { useChat } from "../../context/ChatAppContext";
-import { useSocketContext } from "../../context/SocketContext";
-import { camelCaseKeys, snakeCaseKeys } from "../../utils/Utilities";
 import Modal from "../Modal";
 
 type Props = {
@@ -13,21 +11,12 @@ type Props = {
 };
 
 const LeaveGroupChat = ({ showSelf, roomName }: Props) => {
-  // const {socket, isConnected, currentRoom, setCurrentRoom} = useSocketContext();
   const { sendMessage, on, off } = useBetterSocket();
   const { currentChatRoom, setCurrentChatRoom } = useChat();
 
   const handleLeaveRoom = (e: React.MouseEvent) => {
     e.preventDefault();
-    sendMessage("LEAVE_ROOM", {roomId: currentChatRoom?.roomId});
-    // if (isConnected) {
-    //   socket.send(JSON.stringify(snakeCaseKeys({
-    //     type: "LEAVE_ROOM",
-    //     payload: {
-    //       "roomId": currentRoom
-    //     }
-    //   })))
-    // }
+    sendMessage("LEAVE_GROUP_CHAT", {roomId: currentChatRoom?.roomId});
   }
 
   const handleOnClose = (e: React.MouseEvent) => {
@@ -41,23 +30,12 @@ const LeaveGroupChat = ({ showSelf, roomName }: Props) => {
   }, [setCurrentChatRoom, showSelf])
 
   useEffect(() => {
-    on("LEAVE_ROOM", closeModal);
+    on("LEAVE_GROUP_CHAT", closeModal);
 
     return () => {
-      off("LEAVE_ROOM", closeModal);
+      off("LEAVE_GROUP_CHAT", closeModal);
     }
   }, [on, off, closeModal])
-
-  // useEffect(() => {
-  //   if (isConnected) {
-  //     socket.addEventListener('message', (event) => {
-  //       const data = JSON.parse(event.data);
-  //       if (data.type === "LEAVE_ROOM") {
-  //         closeModal();
-  //       }
-  //     })
-  //   }
-  // }, [socket, isConnected, closeModal])
 
   return (
     <Modal onClose={handleOnClose}>

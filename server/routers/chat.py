@@ -65,6 +65,8 @@ async def websocket_endpoint(
                     await chat_events.invite_friend_to_group_chat(websocket, invite, user, db, manager)
                 case "GET_FRIENDS":
                     await chat_events.get_friends(websocket, user, db, manager)
+                case "GET_FRIEND_REQUESTS": 
+                    await chat_events.get_friend_requests(websocket, user, db, manager)
                 case "SEND_FRIEND_REQUEST":
                     friend = schemas.Friend(**parsed_data.payload)
                     await chat_events.send_friend_request(websocket, friend, user, db, manager)

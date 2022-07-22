@@ -1,3 +1,9 @@
+"""
+Messaging.py
+Contains functions that handle events regarding messages:
+* send_message: Emits a message from a user to other online users
+* get_messages: Sends messages from a room to a user
+"""
 import models
 import schemas
 from sqlalchemy.orm import Session
@@ -12,13 +18,12 @@ async def send_message(websocket: WebSocket, message: schemas.SendMessage, user:
     # Check if user belongs to the room. Finds a participant that matches the room id, and sees if the user id matches that of the user
     valid_room = db.query(models.Participant).filter(models.Participant.room_id == message.room_id, models.Participant.user_id == user.id).first()
     if valid_room is None:
-        await manager.send_personal_message({
-            "type": "ERORR", 
-            "payload": {
-                "message": "User is not a member of this room",
-                "room_id": message.room_id
-            }
-        })
+        raise WebSocketEventException(
+                event_name="SEND_MESSAGE", 
+                message="User is not a member of this room", 
+                other={"room_id": message.room_id}
+            )
+        
 
     # Store message in database
     db_message = models.Message(**message.dict(), user_id=user.id)

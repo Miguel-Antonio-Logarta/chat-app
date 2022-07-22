@@ -61,29 +61,6 @@ const MessageList = (props: MessageListProps) => {
     }
   }, [on, off])
 
-  // useEffect(() => {
-  //   if (isConnected) {
-  //     socket.addEventListener("message", (event) => {
-  //       const evt = JSON.parse(event.data);
-  //       if (evt.type === "SEND_MESSAGE") {
-  //         setMessages([
-  //           ...messages,
-  //           {
-  //             id: evt.payload.id,
-  //             username: evt.payload.username,
-  //             message: evt.payload.message,
-  //             timestamp: evt.payload.timestamp,
-  //           },
-  //         ]);
-  //       } else if (evt.type === "GET_MESSAGES") {
-  //         setMessages(evt.payload.messages);
-  //         setRoomName(evt.payload.room_name);
-  //         // scrollToBottom(false);
-  //       }
-  //     });
-  //   }
-  // }, [messages, socket, isConnected]);
-
   useEffect(() => {
     // TODO: Check if previous state messages was empty.
     // scrollToBottom();

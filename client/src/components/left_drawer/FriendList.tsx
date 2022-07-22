@@ -1,61 +1,51 @@
-import React from "react";
-import { AiOutlinePlus } from "react-icons/ai";
-import { friends } from "../../data/testData";
+import React, { useEffect } from "react";
+import { useBetterSocket } from "../../context/BetterSocketContext";
+import { useChat } from "../../context/ChatAppContext";
+// import { friends } from "../../data/testData";
+import Friend from "./Friend";
 
 type Props = {};
-type FriendProps = {
-  id: number;
-  username: string;
-  description: string;
-  online: boolean;
-};
-
-const Friend = (props: FriendProps) => {
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  }
-
-  return (
-    <div onClick={handleClick} className='friend-overview'>
-      <div className={`friend-icon ${props.online ? "online" : "offline"}`}></div>
-      <div className='friend-info'>
-        <h4>{props.username}</h4>
-        <p>{props.description}@##:##</p>
-      </div>
-    </div>
-  );
-}
 
 const FriendList = (props: Props) => {
+  // const {on, off} = useBetterSocket();
+  const { friends } = useChat();
+  
+  // useEffect(() => {
+  //   const handleNewFriend = (payload: any) => {
+  //     console.log("I got a new friend!");
+  //     setFriends((friends) => [
+  //       ...friends,
+  //       {
+  //         userId: payload.friendId,
+  //         username: payload.friendUsername,
+  //         roomId: payload.roomId
+  //       }
+  //     ])
+  //   }
+
+  //   on("ACCEPT_FRIEND_REQUEST", handleNewFriend);
+
+  //   return () => {
+  //     off("ACCEPT_FRIEND_REQUEST", handleNewFriend);
+  //   }
+  // }, [on, off, setFriends])
+
   return (
     <>
       <div className="upper-chat-list">
         <h2>My Friends</h2>
-        {/* <button>
-          <AiOutlinePlus />
-        </button> */}
       </div>
       <div className="friend-list">
         {friends.map((friend) => 
           <Friend 
-            key={friend.id} 
-            id={friend.id} 
+            key={friend.userId} 
+            id={friend.userId} 
             username={friend.username}
             description="Last Message Here" 
+            roomId={friend.roomId}
             online={true} />
         )}
       </div>
-      {/* <div className="select-group-chat">
-            {rooms.map((room) => <GroupChatItem
-              key={room.roomId}
-              roomId={room.roomId}
-              roomName={room.name}
-              isGroupChat={room.isGroupChat}
-              createdOn={room.createdOn}
-              description={"last message goes here "}
-              />)
-            }
-          </div> */}
     </>
   );
 };

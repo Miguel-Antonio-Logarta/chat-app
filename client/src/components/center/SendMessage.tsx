@@ -3,7 +3,6 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { MdOutlineImage, MdTagFaces } from "react-icons/md";
 import { useBetterSocket } from "../../context/BetterSocketContext";
 import { useChat } from "../../context/ChatAppContext";
-import { useSocketContext } from "../../context/SocketContext";
 import { noBlankSpacesRegex } from "../../data/constants";
 
 type Props = {};
@@ -26,22 +25,9 @@ const SendMessage = (props: Props) => {
       })
       reset();
     }
-    // if (currentRoom !== null && isConnected) {
-    //   socket.send(
-    //     JSON.stringify({
-    //       type: "SEND_MESSAGE",
-    //       payload: {
-    //         message: data.message,
-    //         room_id: currentRoom,
-    //       },
-    //     })
-    //   );
-    //   reset();
-    // }
   };
   
   return (
-    // <div className="chat-messages-input">
     <form onSubmit={handleSubmit(onSubmit)} className="chat-messages-input">
       <button className="square-button">
         <MdOutlineImage className="icon" />
@@ -62,7 +48,6 @@ const SendMessage = (props: Props) => {
         Send Message
       </button>
     </form>
-    // </div>
   );
 };
 

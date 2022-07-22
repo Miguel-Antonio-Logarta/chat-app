@@ -1,3 +1,15 @@
+"""
+rooms.py
+Contains functions that handle events regarding rooms (private chats and group chats):
+* get_group_chats: Gets group chats that user is in
+* get_rooms: Gets all private chats and group chats taht user is in
+* create_group_chat: Creates a group chat
+* join_group_chat: Sends to user information about a group chat before confirming
+* confirm_join_group_chat: Makes a user join a group chat 
+* leave_group_chat: Leaves a group chat
+* invite_friend_to_group_chat: Invites a friend to a group chat
+* get_room_info: Gets more detailed information about a group chat, including online and offline users
+"""
 import models
 import schemas
 from sqlalchemy.orm import Session

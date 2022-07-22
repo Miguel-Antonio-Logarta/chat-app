@@ -1,20 +1,18 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { Friend, FriendRequest, GroupChat } from "../types";
 import { useBetterSocket } from "./BetterSocketContext";
 
 type ChatAppContextProviderProps = {
     children?: React.ReactNode;
 }
 
-type GroupChatType = {
-    roomId: number;
-    name: string;
-    isGroupChat: boolean;
-    createdOn: string;
-}
-
 type ChatAppContextType = {
-    groupChats: Array<GroupChatType>;
-    setGroupChats: React.Dispatch<React.SetStateAction<GroupChatType[]>>;
+    groupChats: GroupChat[];
+    friends: Friend[];
+    friendRequests: FriendRequest[];
+    setGroupChats: React.Dispatch<React.SetStateAction<GroupChat[]>>;
+    setFriends: React.Dispatch<React.SetStateAction<Friend[]>>;
+    setFriendRequests: React.Dispatch<React.SetStateAction<FriendRequest[]>>;
     currentChatRoom: CurrentChatRoomType | null;
     setCurrentChatRoom: React.Dispatch<React.SetStateAction<CurrentChatRoomType | null>>;
 }
@@ -28,27 +26,41 @@ type CurrentChatRoomType = {
     roomId: number;
     roomName: string;
     isGroupChat: boolean;
-    onlineUsers: Array<UserInfoType>;
-    offlineUsers: Array<UserInfoType>;
+    onlineUsers: UserInfoType[];
+    offlineUsers: UserInfoType[];
 }
 
 export const ChatAppContext = createContext<ChatAppContextType>(null!);
 export const useChat = () => useContext(ChatAppContext);
 export const ChatAppContextProvider = ({children}: ChatAppContextProviderProps) => {
     // Holds the global state and handles authentication and web socket
-    const {socket, isConnected, on, off, sendMessage} = useBetterSocket();
+    const { on, off, sendMessage } = useBetterSocket();
 
-    const friends = [];
-    const [groupChats, setGroupChats] = useState<Array<GroupChatType>>([]);
+    const [friends, setFriends] = useState<Friend[]>([]);
+    const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+    const [groupChats, setGroupChats] = useState<GroupChat[]>([]);
     const [currentChatRoom, setCurrentChatRoom] = useState<CurrentChatRoomType | null>(null);
-    const friendDMs = [];
 
     useEffect(() => {
+        // Hydrate state by getting group chats, friends, and friend requests
+        // TODO: Add listeners for updates to group chats, friends, and friend requests (ex: Someone rejects/accepts your friend request or you get invited to a group chat)
         sendMessage("GET_GROUP_CHATS", {});
+        sendMessage("GET_FRIENDS", {});
+        sendMessage("GET_FRIEND_REQUESTS", {});
 
-        const handleGroupChats = (payload: any) => {
+        const handleGroupChats = (payload: GroupChat[]) => {
             console.log("Group Chats", payload);
             setGroupChats(payload);
+        }
+
+        const handleGetFriends = (payload: Friend[]) => {
+            console.log("Friends", payload);
+            setFriends(payload);
+        }
+
+        const handleGetFriendRequests = (payload: FriendRequest[]) => {
+            console.log("Friend Requests", payload);
+            setFriendRequests(payload);
         }
 
         const handleLeaveRoom = (payload: any) => {
@@ -57,36 +69,41 @@ export const ChatAppContextProvider = ({children}: ChatAppContextProviderProps) 
             );
         }
 
-        on("GET_GROUP_CHATS", handleGroupChats);
-        on("LEAVE_ROOM", handleLeaveRoom);
+        const handleNewFriend = (payload: any) => {
+            setFriends((friends) => [
+              ...friends,
+              {
+                userId: payload.friendId,
+                username: payload.friendUsername,
+                roomId: payload.roomId
+              }
+            ])
+          }
 
+        on("GET_GROUP_CHATS", handleGroupChats);
+        on("GET_FRIENDS", handleGetFriends);
+        on("GET_FRIEND_REQUESTS", handleGetFriendRequests);
+        on("LEAVE_ROOM", handleLeaveRoom);
+        on("ACCEPT_FRIEND_REQUEST", handleNewFriend);
+        
         return () => {
             off("GET_GROUP_CHATS", handleGroupChats);
+            off("GET_FRIENDS", handleGetFriends);
+            off("GET_FRIEND_REQUESTS", handleGetFriendRequests);
             off("LEAVE_ROOM", handleLeaveRoom);
+            off("ACCEPT_FRIEND_REQUEST", handleNewFriend);
         }
     }, [sendMessage, on, off])
 
-    // const sendMessage = (eventType: string, payload: any, f: (payload: unknown) => void) => {
-    //     socket.send(JSON.stringify({
-    //         type: eventType,
-    //         payload: payload
-    //     }))
-
-    //     // How do we remove this event listener when the object that called it unmounts?
-    //     // Instead, we should store event listeners in an array
-    //     socket.addEventListener('message', (event) => {
-    //         const data = JSON.parse(event.data);
-    //         if (data.type === eventType) {
-    //             f(data.payload);
-    //         }
-    //     })
-    // }
-
     const value = {
         groupChats: groupChats,
+        friends: friends,
+        friendRequests: friendRequests,
         setGroupChats: setGroupChats,
         currentChatRoom: currentChatRoom,
-        setCurrentChatRoom: setCurrentChatRoom
+        setCurrentChatRoom: setCurrentChatRoom,
+        setFriends: setFriends,
+        setFriendRequests: setFriendRequests
     };
 
     return (

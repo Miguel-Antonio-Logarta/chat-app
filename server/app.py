@@ -1,10 +1,8 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import users, chat
-from database import get_db, db_context_manager
-from sqlalchemy.orm import Session
+from database import  db_context_manager
 import models
-# from server.database import db_context_manager
 
 app = FastAPI()
 app.add_middleware(

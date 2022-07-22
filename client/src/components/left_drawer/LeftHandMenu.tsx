@@ -4,7 +4,7 @@ import { MdOutlineGroups } from "react-icons/md"
 import { BsChatDots } from "react-icons/bs"
 import GroupChatList from './GroupChatList';
 import FriendList from './FriendList';
-import FriendRequests from './FriendRequests';
+import FriendRequestList from './FriendRequestList';
 
 type LeftHandMenuProps = {}
 
@@ -24,7 +24,7 @@ const LeftHandMenu = (props: LeftHandMenuProps) => {
       case CurrentList.FriendList:
         return <FriendList />
       case CurrentList.FriendRequests:
-        return <FriendRequests />
+        return <FriendRequestList />
     }
   }
 

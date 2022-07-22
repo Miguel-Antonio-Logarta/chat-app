@@ -1,7 +1,7 @@
 // import { connect } from "http2";
 import React, { createContext, useContext } from "react";
 import { useCookies } from "react-cookie";
-import { SendMessage } from "../types";
+import { EventTypes, SendMessage } from "../types";
 import { camelCaseKeys, snakeCaseKeys } from "../utils/Utilities";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import { useAuth } from "./AuthContext";
@@ -14,8 +14,10 @@ type BetterSocketContextType = {
     // socket: WebSocket;
     socket: ReconnectingWebSocket;
     isConnected: () => boolean;
-    on: (eventType: string, f: (payload: unknown) => void) => Function;
+    on: (eventType: string, f: (payload: any) => void) => Function;
     off: (eventType: string, f: Function) => void;
+    onError: (eventType: string, f: (payload: any) => void) => Function;
+    offError: (eventType: string, f: Function) => void;
     sendMessage: (eventType: string, payload: any) => void;
 }
 
@@ -34,10 +36,11 @@ export const BetterSocketProvider = ({children}: BetterSocketProviderProps) => {
     const {authenticated} = useAuth();
     const [cookies] = useCookies(['token']);
     const eventListeners: Map<string, Array<Function>> = new Map();
-    // const errorListeners: Map<string, Array<Function>> = new Map();
+    const errorListeners: Map<string, Array<Function>> = new Map();
+
     let rws: ReconnectingWebSocket = new ReconnectingWebSocket(`${process.env.REACT_APP_WS}?token=${cookies.token}`, [], options);
 
-    const on = (eventType: string, f: (payload: unknown) => void): Function => {
+    const on = (eventType: string, f: (payload: any) => void): Function => {
         // Adds event listener to socket.
         console.table(eventListeners);
         const eventListener = eventListeners.get(eventType);
@@ -61,6 +64,30 @@ export const BetterSocketProvider = ({children}: BetterSocketProviderProps) => {
         console.table(eventListeners);
     }
 
+    const onError = (eventType: string, f: (payload: any) => void): Function => {
+        // Adds event listener to socket.
+        console.table(errorListeners);
+        const errorListener = errorListeners.get(eventType);
+        if (errorListener) {
+            errorListener.push(f);
+            // console.log(f);
+            return () => errorListener.filter((callback) => callback !== f);
+        } else {
+            errorListeners.set(eventType, [f]);
+            // console.log(f);
+            return () => errorListeners.get(eventType)!.filter((callback) => callback !== f);
+        }
+    }
+
+    const offError = (eventType: string, f: Function): void => {
+        // Removes an action
+        const errorListener = errorListeners.get(eventType);
+        if (errorListener) {
+            errorListeners.set(eventType, errorListener.filter((callback) => callback !== f));
+        }
+        console.table(errorListeners);
+    }
+
     const sendMessage = (eventType: string, payload: any) => {
         rws.send(JSON.stringify({
             type: eventType,
@@ -77,10 +104,21 @@ export const BetterSocketProvider = ({children}: BetterSocketProviderProps) => {
 
         rws.addEventListener('message', (event) => {
             const data = camelCaseKeys(JSON.parse(event.data));
-            const eventListener = eventListeners.get(data.type);
-            console.log("Message: ", data);
-            if (eventListener) {
-                eventListener.forEach((callback) => callback(data.payload));
+            
+            // TODO: Fix this part
+            if (data.type === "ERROR") {
+                const errorListener = errorListeners.get(data.type);
+                console.log("ERROR: ", data);
+                if (errorListener) {
+                    errorListener.forEach((callback) => callback(data.payload));
+                }
+            } 
+            else {
+                const eventListener = eventListeners.get(data.type);
+                console.log("Message: ", data);
+                if (eventListener) {
+                    eventListener.forEach((callback) => callback(data.payload));
+                }
             }
         })
 
@@ -99,6 +137,8 @@ export const BetterSocketProvider = ({children}: BetterSocketProviderProps) => {
         isConnected: () => rws.readyState === 1,
         on: on,
         off: off,
+        onError: onError,
+        offError: offError,
         sendMessage: sendMessage
     }
 
