@@ -3,6 +3,16 @@ Contains functions that handle friend requests such as sending friend requests,
 accepting friend requests, rejecting friend requests, and automatically creating private rooms between friends
 """
 import models
+"""
+friends.py
+Contains functions that handle events regarding friends:
+* send_friend_request: sends back user information about a user prior to sending a friend request
+* accept_friend_request: accepts a friend request
+* reject_friend_request: rejects a friend request
+* confirm_send_friend_request: sends a friend request after confirmation
+* get_friends: gets friends of user (Accepted friend requests)
+* get_friend_requests: gets friend requests of user (Pending friend requests)
+"""
 import schemas
 from sqlalchemy.orm import Session
 from fastapi import WebSocket
@@ -48,27 +58,8 @@ async def accept_friend_request(websocket: WebSocket, friend: schemas.Friend, us
     db.commit()
     db.refresh(db_friend)
 
-
     db_friend_username = db.query(models.User.username).filter(models.User.id == friend.friend_id).first()
-    # Sends back user information of the friend whose request we just accepted.
-    await manager.send_personal_message(websocket, {
-        "type": "ACCEPT_FRIEND_REQUEST",
-        "payload": {
-            "friend_id": db_friend.user_id,
-            "friend_username": db_friend_username.username
-        }
-    })
 
-    # Sends a message to the friend that their friend request was accepted
-    await manager.send_message_to([friend.friend_id], {
-        "type": "ACCEPT_FRIEND_REQUEST",
-        "payload": {
-            "friend_id": user.id,
-            "friend_username": user.username
-        }
-    })
-
-    # TODO: Automatically create a DM that is not a group chat for friend and user
     new_room = models.Room(name="", is_group_chat=False)
     db.add(new_room)
     db.commit()
@@ -81,6 +72,26 @@ async def accept_friend_request(websocket: WebSocket, friend: schemas.Friend, us
     db.commit()
     db.refresh(user_participant)
     db.refresh(friend_participant)
+    
+    # Sends back user information of the friend whose request we just accepted.
+    await manager.send_personal_message(websocket, {
+        "type": "ACCEPT_FRIEND_REQUEST",
+        "payload": {
+            "friend_id": db_friend.user_id,
+            "friend_username": db_friend_username.username,
+            "room_id": new_room.id
+        }
+    })
+
+    # Sends a message to the friend that their friend request was accepted
+    await manager.send_message_to([friend.friend_id], {
+        "type": "ACCEPT_FRIEND_REQUEST",
+        "payload": {
+            "friend_id": user.id,
+            "friend_username": user.username,
+            "room_id": new_room.id
+        }
+    })
 
     await manager.send_message_to([user.id, db_friend.user_id], {
         "type": "CREATE_FRIEND_CHAT",
@@ -188,14 +199,22 @@ async def confirm_send_friend_request(websocket: WebSocket, friend: schemas.Frie
 async def get_friends(websocket: WebSocket, user: models.User, db: Session, manager: ConnectionManager):
     """Gets friends and room ids to chat with friends"""
     # Get friends, username, and room id
+    # SELECT * FROM "Friend"
+    # LEFT JOIN "User" ON "Friend".user_id = "User".id
+    # LEFT JOIN "Participant" ON "User".id = "Participant".user_id
+    # LEFT JOIN "Room" ON "Participant".room_id = "Room".id; blah blah blah
+    # Maybe just add a room_id column to friend or change user_Id and friend_id to participant ids
+    # Or have the database check a condition first (like seeing if is_group_chat is false and if there are already two participants inserted) before inserting a room.
     q = db.query(models.Friend, models.User, models.Participant) \
             .join(models.User, models.Friend.user_id == models.User.id, isouter=True) \
             .join(models.Participant, models.User.id == models.Participant.user_id) \
             .filter((models.Friend.user_id == user.id) | (models.Friend.friend_id == user.id), 
                     models.Friend.status == models.FriendStatus.ACCEPTED
-            ).all()
+            )
+    print(q)
+    q_all = q.all()
     friends = []
-    for db_friend, db_user, db_participant in q:
+    for db_friend, db_user, db_participant in q_all:
         print(db_user.id, db_user.username, db_participant.room_id)
         friends.append({
             "user_id": db_user.id,
@@ -222,7 +241,7 @@ async def get_friend_requests(websocket: WebSocket, user: models.User, db: Sessi
         friend_requests.append({
             "user_id": db_user.id,
             "username": db_user.username,
-            "created_on": db_friend.created_on
+            "created_on": db_friend.created_on.isoformat()
         })
 
     await manager.send_personal_message(websocket, {
