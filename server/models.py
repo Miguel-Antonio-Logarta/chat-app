@@ -70,6 +70,7 @@ class Friend(Base):
     user_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
     friend_id = Column(BigInteger, ForeignKey("User.id"), nullable=False)
     status = Column(Enum(FriendStatus), nullable=False)
+    room_id = Column(BigInteger, ForeignKey("Room.id"), nullable=True)
     created_on = Column(
         TIMESTAMP(timezone=True),
         nullable=False,

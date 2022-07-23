@@ -16,7 +16,10 @@ from errors import WebSocketEventException
 async def send_message(websocket: WebSocket, message: schemas.SendMessage, user: models.User, db: Session, manager: ConnectionManager):
     """Sends a message to a room"""
     # Check if user belongs to the room. Finds a participant that matches the room id, and sees if the user id matches that of the user
-    valid_room = db.query(models.Participant).filter(models.Participant.room_id == message.room_id, models.Participant.user_id == user.id).first()
+    valid_room = db.query(models.Participant) \
+                        .filter(models.Participant.room_id == message.room_id, 
+                                models.Participant.user_id == user.id) \
+                        .first()
     if valid_room is None:
         raise WebSocketEventException(
                 event_name="SEND_MESSAGE", 
@@ -44,12 +47,28 @@ async def send_message(websocket: WebSocket, message: schemas.SendMessage, user:
 
 async def get_messages(websocket: WebSocket, room: schemas.Room, user: models.User, db: Session, manager: ConnectionManager):
     """Gets all messages from a room"""
-    db_room = db.query(models.Room).filter(models.Room.id == room.room_id).first()
-    if db_room is None:
+    # Check if user is a member of the room
+    is_member = db.query(models.Room, models.Participant) \
+                    .filter(models.Participant.room_id == models.Room.id,
+                            models.Participant.user_id == user.id,
+                            models.Participant.room_id == room.room_id) \
+                    .first()
+    if is_member is None:
         # Send an error back
-        raise WebSocketEventException("GET_MESSAGES", "Room does not exist", {"room_id": room.room_id})
+        raise WebSocketEventException(
+                event_name="GET_MESSAGES", 
+                message="User cannot read messages from a room they are not part of, or read messages from a room that does not exist", 
+                other={"room_id": room.room_id}
+            )
 
-    query = db.query(models.Message, models.User).filter(and_(models.Message.room_id == room.room_id, models.Message.user_id == models.User.id)).order_by(models.Message.created_on.asc()).all()
+    (db_room, db_participant) = is_member
+
+    # Get messages from the room
+    query = db.query(models.Message, models.User)\
+                .filter(models.Message.room_id == room.room_id, 
+                        models.Message.user_id == models.User.id) \
+                .order_by(models.Message.created_on.asc()) \
+                .all()
     messages_out: List[schemas.SendMessage] = []
     for db_message, db_user in query:
         messages_out.append({
@@ -58,6 +77,7 @@ async def get_messages(websocket: WebSocket, room: schemas.Room, user: models.Us
             "message": db_message.message,
             "timestamp": db_message.created_on.isoformat()
         })
+    
     await manager.send_personal_message(websocket, {
         "type": "GET_MESSAGES",
         "payload": {

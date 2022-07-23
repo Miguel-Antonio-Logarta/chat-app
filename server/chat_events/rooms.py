@@ -166,7 +166,7 @@ async def leave_group_chat(websocket: WebSocket, room: schemas.Room, user: model
         }
     })
 
-    await manager.broadcast(websocket, {
+    await manager.broadcast(user, {
         "type": "PARTICIPANT_LEFT",
         "payload": {
             "user_id": user.id,
