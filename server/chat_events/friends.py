@@ -8,37 +8,204 @@ Contains functions that handle events regarding friends:
 * get_friends: gets friends of user (Accepted friend requests)
 * get_friend_requests: gets friend requests of user (Pending friend requests)
 """
-import schemas
-import models
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 from fastapi import WebSocket
 from connection_manager import ConnectionManager
 from errors import WebSocketEventException
+import schemas
+import models
 
-
-async def send_friend_request(websocket: WebSocket, friend: schemas.Friend, user: models.User, db: Session, manager: ConnectionManager):
+async def send_friend_request(websocket: WebSocket, 
+                              friend: schemas.Friend, 
+                              user: models.User, 
+                              db: Session, 
+                              manager: ConnectionManager):
     """Sends back information about a user for confirmation for a friend request"""
-    db_friend = db.query(models.Friend).filter(models.Friend.user_id == user.id, models.Friend.friend_id == friend.friend_id).first()
+    # Test with:
+        # 9, 3, 5, 2, 8, 6 
+        # User that doesn't exist 10 DONE
+        # Sending friend request to themselves DONE
+        # User that you are already friends with (user -> friend) 3 -> 5 DONE
+        # User that you are already friends with (friend -> user) 2 -> 3 DONE
+        # User that you already sent a friend request to (user -> friend) 3 -> 8 DONE
+        # Friend that already sent user a friend request to (friend -> user) 6 -> 3 DONE
+    db_friend_user = db.query(models.User) \
+                        .filter(models.User.id == friend.friend_id) \
+                        .first()
+
+    db_friend_request = db.query(models.Friend) \
+                    .filter(or_(
+                            and_(models.Friend.user_id == user.id, 
+                                 models.Friend.friend_id == friend.friend_id), 
+                            and_(models.Friend.user_id == friend.friend_id, 
+                                 models.Friend.friend_id == user.id))) \
+                    .first()
+    
+    # Check if user exists
+    if db_friend_user is None:
+        raise WebSocketEventException(
+                event_name="SEND_FRIEND_REQUEST", 
+                message="User does not exist", 
+                other={"friend_id": friend.friend_id}
+            )
     
     # Check if user is already friends
-    if db_friend is not None and db_friend.status == models.FriendStatus.ACCEPTED:
-        raise WebSocketEventException("SEND_FRIEND_REQUEST", "You are already friends", {"friend_id": friend.friend_id})
-    # Check if user has already sent a friend request
-    elif db_friend is not None and db_friend.status == models.FriendStatus.PENDING:
-        raise WebSocketEventException("SEND_FRIEND_REQUEST", "You already sent a friend request", {"friend_id": friend.friend_id})
+    if db_friend_request is not None:
+        if db_friend_request.status == models.FriendStatus.ACCEPTED:
+            raise WebSocketEventException(
+                    event_name="SEND_FRIEND_REQUEST",
+                    message=f"You are already friends with {db_friend_user.username}",
+                    other={"friend_id": friend.friend_id, "username": db_friend_user.username}
+                )
 
-    # Check if user exists
-    db_friend_user = db.query(models.User).filter(models.User.id == friend.friend_id).first()
-    if db_friend_user is None:
-        raise WebSocketEventException("SEND_FRIEND_REQUEST", "User does not exist", {"friend_id": friend.friend_id})
+        # Check if user or friend has already sent a friend request
+        if db_friend_request.status == models.FriendStatus.PENDING:
+            if db_friend_request.user_id == user.id:
+                raise WebSocketEventException(
+                        event_name="SEND_FRIEND_REQUEST",
+                        message=f"You already sent a friend request to {db_friend_user.username}",
+                        other={"friend_id": friend.friend_id, "username": db_friend_user.username}
+                    )
+            elif db_friend_request.user_id == friend.friend_id:
+                raise WebSocketEventException(
+                        event_name="SEND_FRIEND_REQUEST",
+                        message=f"{db_friend_user.username} already sent you a friend request",
+                        other={"friend_id": friend.friend_id, "username": db_friend_user.username}
+                    )  
     
     await manager.send_personal_message(websocket, {
         "type": "SEND_FRIEND_REQUEST",
         "payload": {
-            "username": db_friend_user.username,
-            "user_id": db_friend_user.id
+            "friend_username": db_friend_user.username,
+            "friend_id": db_friend_user.id
         }
     })
+
+async def confirm_send_friend_request(websocket: WebSocket,
+                                      friend: schemas.Friend,
+                                      user: models.User,
+                                      db: Session,
+                                      manager: ConnectionManager):
+    """Confirms and sends a friend request"""
+    # Test with:
+        # 9, 3, 5, 2, 8, 6 what about 7, 9
+        # User that doesn't exist 10 DONE
+        # Sending friend request to themselves DONE
+        # User that you are already friends with (user -> friend) 3 -> 5 DONE
+        # User that you are already friends with (friend -> user) 2 -> 3 DONE
+        # User that you already sent a friend request to (user -> friend) 3 -> 8 DONE
+        # Friend that already sent user a friend request to (friend -> user) 6 -> 3 DONE
+        # Friend request that you already rejected (friend -> user) 7 -> 3 DONE
+        # Friend request that was already rejected (user -> friend) 3 -> 9 DONE
+    db_friend_user = db.query(models.User) \
+                        .filter(models.User.id == friend.friend_id) \
+                        .first()
+
+    db_friend_request = db.query(models.Friend) \
+                            .filter(or_(
+                                    and_(models.Friend.user_id == user.id, 
+                                        models.Friend.friend_id == friend.friend_id), 
+                                    and_(models.Friend.user_id == friend.friend_id, 
+                                        models.Friend.friend_id == user.id))) \
+                            .first()
+    
+    # Check if user exists
+    if db_friend_user is None:
+        raise WebSocketEventException(
+                event_name="CONFIRM_SEND_FRIEND_REQUEST", 
+                message="User does not exist", 
+                other={"friend_id": friend.friend_id}
+            )
+    
+    # Check if user is already friends
+    if db_friend_request is not None:
+        if db_friend_request.status == models.FriendStatus.ACCEPTED:
+            raise WebSocketEventException(
+                    event_name="CONFIRM_SEND_FRIEND_REQUEST",
+                    message=f"You are already friends with {db_friend_user.username}",
+                    other={"friend_id": friend.friend_id, "username": db_friend_user.username}
+                )
+
+        # Check if user or friend has already sent a friend request
+        elif db_friend_request.status == models.FriendStatus.PENDING:
+            if db_friend_request.user_id == user.id:
+                raise WebSocketEventException(
+                        event_name="CONFIRM_SEND_FRIEND_REQUEST",
+                        message=f"You already sent a friend request to {db_friend_user.username}",
+                        other={"friend_id": friend.friend_id, "username": db_friend_user.username}
+                    )
+            elif db_friend_request.user_id == friend.friend_id:
+                raise WebSocketEventException(
+                        event_name="CONFIRM_SEND_FRIEND_REQUEST",
+                        message=f"{db_friend_user.username} already sent you a friend request",
+                        other={"friend_id": friend.friend_id, "username": db_friend_user.username}
+                    )  
+
+        elif db_friend_request.status == models.FriendStatus.REJECTED:
+            # Check if user rejected the request 
+            # (Switch direction of friend request [user -> friend])
+            # friend -> user, status: REJECTED
+            if db_friend_request.friend_id == user.id:
+                setattr(db_friend_request, 'user_id', user.id)
+                setattr(db_friend_request, 'friend_id', friend.friend_id)
+                setattr(db_friend_request, 'status', models.FriendStatus.PENDING)
+                db.commit()
+                db.refresh(db_friend_request)
+            # Check if friend rejected the request (Resend friend request)
+            # user -> friend, status: REJECTED
+            elif db_friend_request.friend_id == friend.friend_id:
+                setattr(db_friend_request, 'status', models.FriendStatus.PENDING)
+                db.commit()
+                db.refresh(db_friend_request)
+
+            await manager.send_personal_message(websocket, {
+                "type": "CONFIRM_SEND_FRIEND_REQUEST",
+                "payload": {
+                    "friend_id": friend.friend_id,
+                    "friend_username": db_friend_user.username
+                }
+            })
+
+            await manager.send_message_to(
+                [friend.friend_id],
+                {
+                    "type": "RECEIVE_FRIEND_REQUEST",
+                        "payload": {
+                        "username": user.username,
+                        "user_id": user.id
+                    }   
+                }
+            )
+    # Add friend with status of "pending" in direction of user->friend
+    else:
+        friend_request = models.Friend(
+                            user_id=user.id,
+                            friend_id=friend.friend_id,
+                            status=models.FriendStatus.PENDING
+                        )
+        db.add(friend_request)
+        db.commit()
+        db.refresh(friend_request)
+
+        await manager.send_personal_message(websocket, {
+            "type": "CONFIRM_SEND_FRIEND_REQUEST",
+            "payload": {
+                "friend_id": friend.friend_id,
+                "friend_username": db_friend_user.username
+            }
+        })
+
+        await manager.send_message_to(
+            [friend.friend_id],
+            {
+                "type": "RECEIVE_FRIEND_REQUEST",
+                    "payload": {
+                    "username": user.username,
+                    "user_id": user.id
+                }   
+            }
+        )
 
 async def accept_friend_request(websocket: WebSocket,
                                 friend: schemas.Friend,
@@ -46,7 +213,8 @@ async def accept_friend_request(websocket: WebSocket,
                                 db: Session,
                                 manager: ConnectionManager):
     """Accepts a friend request"""
-    # Find a friend request directed towards user that matches ids. user_id (other person) -> friend_id (user)
+    # Find a friend request directed towards user that matches ids. 
+    # user_id (other person) -> friend_id (user)
     db_friend = db.query(models.Friend) \
                     .filter(models.Friend.user_id == friend.friend_id, 
                             models.Friend.friend_id == user.id, 
@@ -71,9 +239,10 @@ async def accept_friend_request(websocket: WebSocket,
     
     # Check if participants of this room already exists
     already_exists = db.query(models.Participant) \
-                            .filter((models.Participant.user_id == user.id) | (models.Participant.user_id == friend.friend_id),
-                                    models.Participant.room_id == new_room.id) \
-                            .all()
+                        .filter((models.Participant.user_id == user.id) | 
+                                (models.Participant.user_id == friend.friend_id),
+                                models.Participant.room_id == new_room.id) \
+                        .all()
 
     # Check if user participant of this room exists yet
     if not any(db_user.user_id == user.id for db_user in already_exists):
@@ -94,7 +263,9 @@ async def accept_friend_request(websocket: WebSocket,
     db.refresh(db_friend)
 
     # Sends back user information of the friend whose request we just accepted.
-    db_friend_username = db.query(models.User.username).filter(models.User.id == friend.friend_id).first()
+    db_friend_username = db.query(models.User.username) \
+                            .filter(models.User.id == friend.friend_id) \
+                            .first()
     await manager.send_personal_message(websocket, {
         "type": "ACCEPT_FRIEND_REQUEST",
         "payload": {
@@ -132,11 +303,24 @@ async def accept_friend_request(websocket: WebSocket,
         }
     })
 
-async def reject_friend_request(websocket: WebSocket, friend: schemas.Friend, user: models.User, db: Session, manager: ConnectionManager):
+async def reject_friend_request(websocket: WebSocket,
+                                friend: schemas.Friend,
+                                user: models.User,
+                                db: Session,
+                                manager: ConnectionManager):
     """Rejects a friend request"""
-    db_friend = db.query(models.Friend).filter(models.Friend.user_id == friend.friend_id, models.Friend.friend_id == user.id, models.Friend.status == models.FriendStatus.PENDING).first()
+    db_friend = db.query(models.Friend) \
+                    .filter(models.Friend.user_id == friend.friend_id, 
+                            models.Friend.friend_id == user.id, 
+                            models.Friend.status == models.FriendStatus.PENDING) \
+                    .first()
+
     if db_friend is None:
-        raise WebSocketEventException("ACCEPT_FRIEND_REQUEST", "Friend request does not exist", {"friend_id": friend.friend_id})
+        raise WebSocketEventException(
+                event_name="ACCEPT_FRIEND_REQUEST",
+                message="Friend request does not exist",
+                other={"friend_id": friend.friend_id}
+            )
 
     setattr(db_friend, 'status', models.FriendStatus.REJECTED)
     db.commit()
@@ -148,94 +332,6 @@ async def reject_friend_request(websocket: WebSocket, friend: schemas.Friend, us
             "user_id": db_friend.user_id
         }
     })
-
-async def confirm_send_friend_request(websocket: WebSocket, friend: schemas.Friend, user: models.User, db: Session, manager: ConnectionManager):
-    """Confirms and sends a friend request"""
-    db_friend = db.query(models.Friend).filter(models.Friend.user_id == user.id, models.Friend.friend_id == friend.friend_id).first()
-
-    # Check if user is already friends
-    if db_friend is not None and db_friend.status == models.FriendStatus.ACCEPTED:
-        raise WebSocketEventException(
-                event_name="CONFIRM_SEND_FRIEND_REQUEST",
-                message="You are already friends",
-                other={"friend_id": friend.friend_id}
-            )
-    # Check if user has already sent a friend request
-    elif db_friend is not None and db_friend.status == models.FriendStatus.PENDING:
-        raise WebSocketEventException(
-                event_name="CONFIRM_SEND_FRIEND_REQUEST",
-                message="You already sent a friend request",
-                other={"friend_id": friend.friend_id}
-            )
-    elif db_friend is not None and db_friend.status == models.FriendStatus.REJECTED:
-        setattr(db_friend, 'status', models.FriendStatus.PENDING)
-        db.commit()
-        db.refresh(db_friend)
-        db_friend_user = db.query(models.User.username).filter(models.User.id == friend.friend_id).first()
-        if db_friend_user is None:
-            raise WebSocketEventException("CONFIRM_SEND_FRIEND_REQUEST", "User does not exist", {"friend_id": friend.friend_id})
-
-        await manager.send_personal_message(websocket, {
-            "type": "CONFIRM_SEND_FRIEND_REQUEST",
-            "payload": {
-                "friend_id": friend.friend_id,
-                "friend_username": db_friend_user.username
-            }
-        })
-
-        await manager.send_message_to(
-            [friend.friend_id],
-            {
-                "type": "RECEIVE_FRIEND_REQUEST",
-                    "payload": {
-                    "username": user.username,
-                    "user_id": user.id
-                }   
-            }
-        )
-
-        return
-
-    # Check if user exists
-    db_friend_user = db.query(models.User.username) \
-                        .filter(models.User.id == friend.friend_id) \
-                        .first()
-
-    if db_friend_user is None:
-        raise WebSocketEventException(
-                event_name="CONFIRM_SEND_FRIEND_REQUEST", 
-                message="User does not exist", 
-                other={"friend_id": friend.friend_id}
-            )
-
-    # Add friend with status of "pending" in direction of user->friend
-    friend_request = models.Friend(
-                        user_id=user.id,
-                        friend_id=friend.friend_id,
-                        status=models.FriendStatus.PENDING
-                    )
-    db.add(friend_request)
-    db.commit()
-    db.refresh(friend_request)
-
-    await manager.send_personal_message(websocket, {
-        "type": "CONFIRM_SEND_FRIEND_REQUEST",
-        "payload": {
-            "friend_id": friend.friend_id,
-            "friend_username": db_friend_user.username
-        }
-    })
-
-    await manager.send_message_to(
-        [friend.friend_id],
-        {
-            "type": "RECEIVE_FRIEND_REQUEST",
-                "payload": {
-                "username": user.username,
-                "user_id": user.id
-            }   
-        }
-    )
 
 async def get_friends(websocket: WebSocket,
                       user: models.User,
@@ -275,7 +371,8 @@ async def get_friend_requests(websocket: WebSocket,
             .filter(models.Friend.friend_id == user.id, 
                     models.Friend.status == models.FriendStatus.PENDING, 
                     models.Friend.user_id == models.User.id) \
-            .all   
+            .all()
+    
     # Construct list of friend requests
     friend_requests = []
     for db_friend, db_user in q:
