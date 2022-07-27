@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { MdClose, MdContentCopy, MdSearch } from "react-icons/md";
 import { useChat } from "../../context/ChatAppContext";
-import {friends} from "../../data/testData";
+// import {friends} from "../../data/testData";
 import Modal from "../Modal";
+import InviteFriendItem from "./InviteFriendItem";
 
 type Props = {
   showSelf: React.Dispatch<React.SetStateAction<boolean>>;
@@ -10,25 +11,11 @@ type Props = {
   roomId: number;
 };
 
-type InviteFriendItemProps = {
-  id: number;
-  username: string;
-}
-
 type FriendType = {
   userId: number;
   username: string;
 }
 
-const InviteFriendItem = (props: InviteFriendItemProps) => {
-  return (
-    <div className="friend-invite">
-      <div className="circle"></div>
-      <p>{props.username}</p>
-      <button>Invite</button>
-    </div>
-  )
-}
 const InviteGroupMembers = ({ showSelf, ...props }: Props) => {
   const [currentSearch, setCurrentSearch] = useState("");
   const { friends, currentChatRoom } = useChat();
@@ -55,7 +42,7 @@ const InviteGroupMembers = ({ showSelf, ...props }: Props) => {
         console.log("members", allMembers);
         // Can invite includes friends that are not in the group chat
         console.log("friends", friends);
-        const canInvite = friends.filter((friend) => allMembers.some((already_invited) => already_invited.userId === friend.userId ));
+        const canInvite = friends.filter((friend) => allMembers.some((already_invited) => already_invited.userId !== friend.userId));
         console.log("can invite", canInvite);
         return canInvite;
       } else {

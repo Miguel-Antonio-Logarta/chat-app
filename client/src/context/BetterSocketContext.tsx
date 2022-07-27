@@ -11,9 +11,9 @@ type BetterSocketProviderProps = {
 }
 
 type BetterSocketContextType = {
-    // socket: WebSocket;
     socket: ReconnectingWebSocket;
     isConnected: () => boolean;
+    // isConnected: boolean;
     on: (eventType: string, f: (payload: any) => void) => Function;
     off: (eventType: string, f: Function) => void;
     onError: (eventType: string, f: (payload: any) => void) => Function;
@@ -26,8 +26,6 @@ const options = {
     maxRetries: 10,
     startClosed: true
 };
-
-// let rws: ReconnectingWebSocket;
 
 export const BetterSocketContext = createContext<BetterSocketContextType>(null!); 
 export const useBetterSocket = () => useContext(BetterSocketContext);
@@ -42,7 +40,7 @@ export const BetterSocketProvider = ({children}: BetterSocketProviderProps) => {
 
     const on = (eventType: string, f: (payload: any) => void): Function => {
         // Adds event listener to socket.
-        console.table(eventListeners);
+        console.log("Event Listeners", eventListeners);
         const eventListener = eventListeners.get(eventType);
         if (eventListener) {
             eventListener.push(f);
@@ -61,20 +59,19 @@ export const BetterSocketProvider = ({children}: BetterSocketProviderProps) => {
         if (eventListener) {
             eventListeners.set(eventType, eventListener.filter((callback) => callback !== f));
         }
-        console.table(eventListeners);
+        console.log("Event Listeners", eventListeners);
     }
 
     const onError = (eventType: string, f: (payload: any) => void): Function => {
         // Adds event listener to socket.
-        console.table(errorListeners);
+        console.log("Error Listeners", errorListeners);
         const errorListener = errorListeners.get(eventType);
         if (errorListener) {
             errorListener.push(f);
-            // console.log(f);
             return () => errorListener.filter((callback) => callback !== f);
         } else {
             errorListeners.set(eventType, [f]);
-            // console.log(f);
+            console.log(f);
             return () => errorListeners.get(eventType)!.filter((callback) => callback !== f);
         }
     }
@@ -85,10 +82,14 @@ export const BetterSocketProvider = ({children}: BetterSocketProviderProps) => {
         if (errorListener) {
             errorListeners.set(eventType, errorListener.filter((callback) => callback !== f));
         }
-        console.table(errorListeners);
+        console.log("Error Listeners", errorListeners);
     }
 
     const sendMessage = (eventType: string, payload: any) => {
+        console.log({
+            type: eventType,
+            payload: snakeCaseKeys(payload)
+        });
         rws.send(JSON.stringify({
             type: eventType,
             payload: snakeCaseKeys(payload)
@@ -105,10 +106,9 @@ export const BetterSocketProvider = ({children}: BetterSocketProviderProps) => {
         rws.addEventListener('message', (event) => {
             const data = camelCaseKeys(JSON.parse(event.data));
             
-            // TODO: Fix this part
             if (data.type === "ERROR") {
-                const errorListener = errorListeners.get(data.type);
-                console.log("ERROR: ", data);
+                const errorListener = errorListeners.get(data.payload.eventType);
+                console.log("ERROR", data);
                 if (errorListener) {
                     errorListener.forEach((callback) => callback(data.payload));
                 }

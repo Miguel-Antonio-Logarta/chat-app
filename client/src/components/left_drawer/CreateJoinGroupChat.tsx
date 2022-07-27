@@ -38,13 +38,21 @@ const CreateJoinGroupChat = ({showSelf}: Props) => {
         // })
     }, [groupChats, setGroupChats, showSelf, sendMessage]);
 
+    const handleCreate = useCallback((payload: any) => {
+
+    }, []);
+
     useEffect(() => {
-        on("JOIN_ROOM", handleJoin);
+        // Move this into the chat app context instead. Because the user could end up clicking somewhere else, unmounting this.
+        on("CONFIRM_JOIN_GROUP_CHAT", handleJoin);
+        on("CREATE_GROUP_CHAT", handleCreate);
 
         return () => {
-            off("JOIN_ROOM", handleJoin);
+            off("CONFIRM_JOIN_GROUP_CHAT", handleJoin);
+            on("CREATE_GROUP_CHAT", handleCreate);
+
         }
-    }, [on, off, handleJoin])
+    }, [on, off, handleJoin, handleCreate])
 
   return (
     <Modal onClose={handleOnClose}>
@@ -54,7 +62,7 @@ const CreateJoinGroupChat = ({showSelf}: Props) => {
             </button>
             <h2 className='thin-yellow-font'>Add a Group Chat</h2>
             <Toggle toggleState={createGroupChat} toggle={setCreateJoinGroupChat} />
-            {createGroupChat ? <CreateGroupChat /> : <JoinGroupChat />}
+            {createGroupChat ? <CreateGroupChat showModal={showSelf} /> : <JoinGroupChat showModal={showSelf}/>}
         </div>
     </Modal>
   )

@@ -34,7 +34,7 @@ export const ChatAppContext = createContext<ChatAppContextType>(null!);
 export const useChat = () => useContext(ChatAppContext);
 export const ChatAppContextProvider = ({children}: ChatAppContextProviderProps) => {
     // Holds the global state and handles authentication and web socket
-    const { on, off, sendMessage } = useBetterSocket();
+    const { on, off, sendMessage, socket } = useBetterSocket();
 
     const [friends, setFriends] = useState<Friend[]>([]);
     const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
@@ -43,11 +43,15 @@ export const ChatAppContextProvider = ({children}: ChatAppContextProviderProps) 
 
     useEffect(() => {
         // Hydrate state by getting group chats, friends, and friend requests
-        // TODO: Add listeners for updates to group chats, friends, and friend requests (ex: Someone rejects/accepts your friend request or you get invited to a group chat)
-        sendMessage("GET_GROUP_CHATS", {});
-        sendMessage("GET_FRIENDS", {});
-        sendMessage("GET_FRIEND_REQUESTS", {});
+        socket.addEventListener('open', (event) => {
+            sendMessage("GET_GROUP_CHATS", {});
+            sendMessage("GET_FRIENDS", {});
+            sendMessage("GET_FRIEND_REQUESTS", {});
+        })
+    }, [socket, sendMessage]);
 
+    useEffect(() => {
+        // TODO: Add listeners for updates to group chats, friends, and friend requests (ex: Someone rejects/accepts your friend request or you get invited to a group chat)
         const handleGroupChats = (payload: GroupChat[]) => {
             console.log("Group Chats", payload);
             setGroupChats(payload);

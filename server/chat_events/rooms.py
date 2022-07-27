@@ -88,21 +88,34 @@ async def create_group_chat(websocket: WebSocket, new_room: schemas.CreateRoom, 
         }
     })
 
-async def confirm_join_group_chat(websocket: WebSocket, room: schemas.Room, user: models.User, db: Session, manager: ConnectionManager):
+async def confirm_join_group_chat(websocket: WebSocket,
+                                  room: schemas.Room,
+                                  user: models.User,
+                                  db: Session,
+                                  manager: ConnectionManager):
     """Joins a group chat with an id"""
     # Find room and check if it exists and if it is a group chat
-    db_room = db.query(models.Room).filter(models.Room.id == room.room_id, models.Room.is_group_chat == True).first()
-    if db_room is None or db_room.is_group_chat is False:
-        raise WebSocketEventException("CONFIRM_JOIN_GROUP_CHAT", "Group chat does not exist", {
-                "room_id": room.room_id
-        })
+    db_room = db.query(models.Room) \
+                    .filter(models.Room.id == room.room_id,
+                            models.Room.is_group_chat == True) \
+                    .first()
     
-    participant_already_exists = db.query(models.Participant).filter(models.Participant.room_id == room.room_id).first()
+    if db_room is None or db_room.is_group_chat is False:
+        raise WebSocketEventException(
+                event_name="CONFIRM_JOIN_GROUP_CHAT",
+                message="Group chat does not exist", 
+                other={"room_id": room.room_id}
+            )
+    
+    participant_already_exists = db.query(models.Participant) \
+                                        .filter(models.Participant.room_id == room.room_id) \
+                                        .first()
     if participant_already_exists:
-        raise WebSocketEventException("CONFIRM_JOIN_GROUP_CHAT", f"You are already a member of {db_room.name}", {
-            "room_id": room.room_id,
-            "room_name" : room.name
-        })
+        raise WebSocketEventException(
+                event_name="CONFIRM_JOIN_GROUP_CHAT",
+                message= f"You are already a member of {db_room.name}", 
+                other={"room_id": room.room_id, "room_name" : room.name}
+            )
     
     # Add participant with room_id and user_id
     db_participant = models.Participant(user_id=user.id, room_id=db_room.id)
@@ -112,7 +125,7 @@ async def confirm_join_group_chat(websocket: WebSocket, room: schemas.Room, user
 
     # Send back message that user has successfully joined
     await manager.send_personal_message(websocket, {
-        "type": "JOIN_ROOM",
+        "type": "CONFIRM_JOIN_GROUP_CHAT",
         "payload": {
             "message": f"Successfully joined {db_room.name}",
             # "room_name": db_room.name,
@@ -124,7 +137,7 @@ async def confirm_join_group_chat(websocket: WebSocket, room: schemas.Room, user
     })
 
     # Message room participants that user has joined the group chat
-    await manager.broadcast(websocket, {
+    await manager.broadcast(user, {
         "type": "PARTICIPANT_JOINED",
         "payload": {
             "user_id": user.id,

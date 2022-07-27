@@ -1,20 +1,46 @@
 // import React from "React";
+import { useEffect } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { MdOutlineCameraAlt } from 'react-icons/md';
 import { useBetterSocket } from '../../context/BetterSocketContext';
 
-type CreateGroupChatProps = {};
+type CreateGroupChatProps = {
+    showModal: any;
+};
+
 type CreateForm = {
     serverName: string;
 }
 
 const CreateGroupChat = (props: CreateGroupChatProps) => {
     const { register, handleSubmit, setError, formState: { errors } } = useForm<CreateForm>();
-    const { on, off, sendMessage } = useBetterSocket();
+    const { onError, offError, sendMessage } = useBetterSocket();
 
     const onSubmit: SubmitHandler<CreateForm> = (data) => {
-        sendMessage("GET_GROUP_CHAT_INFO", {serverName: data.serverName});
+        // sendMessage("GET_GROUP_CHAT_INFO", {serverName: data.serverName});
+        sendMessage("CREATE_GROUP_CHAT", {serverName: data.serverName});
+        props.showModal(false);
     }
+
+    useEffect(() => {
+        // const handleGettingInfo = (payload: any) => {
+        //     setConfirming(true);
+        //     setRoomInfo(payload);
+        // }
+        
+        const handleGettingInfoError = (payload: any) => {
+            console.log("This error is being handled now", payload.message);
+            setError("serverName", {message: payload.message});
+        }
+
+        // on("CREATE_GROUP_CHAT", handleGettingInfo);
+        onError("CREATE_GROUP_CHAT", handleGettingInfoError);
+
+        return () => {
+            // off("CREATE_GROUP_CHAT", handleGettingInfo)
+            offError("CREATE_GROUP_CHAT", handleGettingInfoError);
+        };
+    }, [onError, offError, setError])
 
     return (
         <form className='create-group-chat' onSubmit={handleSubmit(onSubmit)}>
@@ -28,7 +54,7 @@ const CreateGroupChat = (props: CreateGroupChatProps) => {
 
             <label className="server-name-text" htmlFor='serverName'>Server Name</label>
             <input className="server-name" {...register("serverName", {required: true})}></input>
-
+            {errors.serverName?.message && <p className="error-message">{errors.serverName?.message}</p>}
             <button>Create Group Chat</button>
         </form>
     );
