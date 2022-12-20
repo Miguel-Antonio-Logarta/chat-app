@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { useBetterSocket } from "../../context/BetterSocketContext";
 import { useChat } from "../../context/ChatAppContext";
 // import { friends } from "../../data/testData";
 import Friend from "./Friend";

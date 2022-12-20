@@ -1,86 +1,145 @@
-import { createContext, useContext, useState } from 'react'
-import { useAuth } from './AuthContext';
-import { useCookies } from "react-cookie"; 
-
-type SocketContextType = {
-    socket: WebSocket;
-    currentRoom: number | null;
-    setCurrentRoom: React.Dispatch<React.SetStateAction<number | null>>;
-    isConnected: boolean;
-}
+// import { connect } from "http2";
+import React, { createContext, useContext } from "react";
+import { useCookies } from "react-cookie";
+import { EventTypes, SendMessage } from "../types";
+import { camelCaseKeys, snakeCaseKeys } from "../utils/Utilities";
+import ReconnectingWebSocket from "reconnecting-websocket";
+import { useAuth } from "./AuthContext";
 
 type SocketProviderProps = {
-    children: React.ReactNode;
+    children?: React.ReactNode;
 }
 
-let ws: WebSocket;
+type SocketContextType = {
+    socket: ReconnectingWebSocket;
+    isConnected: () => boolean;
+    // isConnected: boolean;
+    on: (eventType: string, f: (payload: any) => void) => Function;
+    off: (eventType: string, f: Function) => void;
+    onError: (eventType: string, f: (payload: any) => void) => Function;
+    offError: (eventType: string, f: Function) => void;
+    sendMessage: (eventType: string, payload: any) => void;
+}
 
-export const SocketContext = createContext<SocketContextType>(null!);
-export const useSocketContext = () => useContext(SocketContext);
+const options = {
+    connectionTimeout: 1000,
+    maxRetries: 10,
+    startClosed: true
+};
 
-const SocketProvider = ({children, ...props}: SocketProviderProps) => {
-    const { onLogout, authenticated } = useAuth();
-    const [room, setRoom] = useState<number | null>(null);
+export const SocketContext = createContext<SocketContextType>(null!); 
+export const useSocket = () => useContext(SocketContext);
+
+export const SocketProvider = ({children}: SocketProviderProps) => {
+    const {authenticated} = useAuth();
     const [cookies] = useCookies(['token']);
-    let reconnectAttempts = 0;
-    // let pingInterval: NodeJS.Timer;
-    const [connected, setConnected] = useState(false);
+    const eventListeners: Map<string, Array<Function>> = new Map();
+    const errorListeners: Map<string, Array<Function>> = new Map();
 
-    const connect = () => {
-        // Something faulty with this if statement.
-        console.log("something something: ", ws == null, (ws && ws.readyState === 3));
-        if (ws == null || (ws && ws.readyState === 3)) {
-            // console.log()
-            // console.log(ws);
-            ws = new WebSocket(`${process.env.REACT_APP_WS}?token=${cookies.token}`);
-            ws.addEventListener('open', event => {
-                setConnected(true);
-                console.log("successful handshake", event);
-                reconnectAttempts = 0;
-                // Pings the server every 30 seconds
-                // pingInterval = setInterval(ping, 30000);
-            })
-                
-            ws.addEventListener('close', event => {
-                setConnected(false);
-                // setTimeout(connect, 5000);
-                // Check why server closed the connection
-                // If the token we sent was not valid, log us out
-                // console.log(event);
-                // setConnected(false);
-                // // clearInterval(pingInterval);
-                // if (event.code === 1008) {
-                //     // clearTimeout(ping);
-                //     // clearInterval(ping);
-                //     // clearInterval(pingInterval);
-                //     onLogout();
-                // } else {
-                //     // ws = null;
-                //     // clearInterval(pingInterval);
-                //     if (reconnectAttempts >= 3) {
-                //         reconnectAttempts = 0;
-                //         onLogout();
-                //         return;
-                //     }
-                //     reconnectAttempts += 1;
-                //     console.log(reconnectAttempts);
-                //     setTimeout(connect, 5000);
-                // }
+    let rws: ReconnectingWebSocket = new ReconnectingWebSocket(`${process.env.REACT_APP_WS}?token=${cookies.token}`, [], options);
 
-            })
+    const on = (eventType: string, f: (payload: any) => void): Function => {
+        // Adds event listener to socket.
+        console.log("Event Listeners", eventListeners);
+        const eventListener = eventListeners.get(eventType);
+        if (eventListener) {
+            eventListener.push(f);
+            // console.log(f);
+            return () => eventListener.filter((callback) => callback !== f);
+        } else {
+            eventListeners.set(eventType, [f]);
+            // console.log(f);
+            return () => eventListeners.get(eventType)!.filter((callback) => callback !== f);
         }
     }
 
-    // This is going to run every time a state change happens, maybe insert another state called "shouldConnect?"
-    if (authenticated) {
-        connect();
+    const off = (eventType: string, f: Function): void => {
+        // Removes an action
+        const eventListener = eventListeners.get(eventType);
+        if (eventListener) {
+            eventListeners.set(eventType, eventListener.filter((callback) => callback !== f));
+        }
+        console.log("Event Listeners", eventListeners);
     }
 
-    const value = {
-        socket: ws,
-        currentRoom: room,
-        setCurrentRoom: setRoom,
-        isConnected: connected
+    const onError = (eventType: string, f: (payload: any) => void): Function => {
+        // Adds event listener to socket.
+        console.log("Error Listeners", errorListeners);
+        const errorListener = errorListeners.get(eventType);
+        if (errorListener) {
+            errorListener.push(f);
+            return () => errorListener.filter((callback) => callback !== f);
+        } else {
+            errorListeners.set(eventType, [f]);
+            console.log(f);
+            return () => errorListeners.get(eventType)!.filter((callback) => callback !== f);
+        }
+    }
+
+    const offError = (eventType: string, f: Function): void => {
+        // Removes an action
+        const errorListener = errorListeners.get(eventType);
+        if (errorListener) {
+            errorListeners.set(eventType, errorListener.filter((callback) => callback !== f));
+        }
+        console.log("Error Listeners", errorListeners);
+    }
+
+    const sendMessage = (eventType: string, payload: any) => {
+        console.log({
+            type: eventType,
+            payload: snakeCaseKeys(payload)
+        });
+        rws.send(JSON.stringify({
+            type: eventType,
+            payload: snakeCaseKeys(payload)
+        }))
+    }
+
+    if (authenticated) {
+        rws = new ReconnectingWebSocket(`${process.env.REACT_APP_WS}?token=${cookies.token}`);
+        
+        rws.addEventListener('open', (event) => {
+            console.log("open: ", event);
+        })
+
+        rws.addEventListener('message', (event) => {
+            const data = camelCaseKeys(JSON.parse(event.data));
+            
+            if (data.type === "ERROR") {
+                const errorListener = errorListeners.get(data.payload.eventType);
+                console.log("ERROR", data);
+                if (errorListener) {
+                    errorListener.forEach((callback) => callback(data.payload));
+                }
+            } 
+            else {
+                const eventListener = eventListeners.get(data.type);
+                console.log("Message: ", data);
+                if (eventListener) {
+                    eventListener.forEach((callback) => callback(data.payload));
+                }
+            }
+        })
+
+        rws.addEventListener('close', (event) => {
+            console.log("closing: ", event);
+            // console.log(event);
+        })
+
+        rws.addEventListener('error', (event) => {
+            console.log("error: ", event);
+        })
+    }
+
+    const value: SocketContextType = {
+        socket: rws,
+        isConnected: () => rws.readyState === 1,
+        on: on,
+        off: off,
+        onError: onError,
+        offError: offError,
+        sendMessage: sendMessage
     }
 
     return (

@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import SendMessage from "./SendMessage";
-import { useSocketContext } from "../../context/SocketContext";
 import Message from "./Message";
 import { useChat } from "../../context/ChatAppContext";
-import { useBetterSocket } from "../../context/BetterSocketContext";
+import { useSocket } from "../../context/SocketContext";
 
 type MessageListProps = {};
 
@@ -21,7 +20,7 @@ const MessageList = (props: MessageListProps) => {
   const { username } = useAuth();
   // const { socket, isConnected, currentRoom } = useSocketContext();
   const { currentChatRoom } = useChat();
-  const { on, off, sendMessage } = useBetterSocket();
+  const { on, off, sendMessage } = useSocket();
   // const [scrollSmoothly, setScrollSmoothly] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);

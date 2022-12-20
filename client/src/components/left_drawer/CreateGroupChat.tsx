@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { MdOutlineCameraAlt } from 'react-icons/md';
-import { useBetterSocket } from '../../context/BetterSocketContext';
+import { useSocket } from '../../context/SocketContext';
 
 type CreateGroupChatProps = {
     showModal: any;
@@ -14,7 +14,7 @@ type CreateForm = {
 
 const CreateGroupChat = (props: CreateGroupChatProps) => {
     const { register, handleSubmit, setError, formState: { errors } } = useForm<CreateForm>();
-    const { onError, offError, sendMessage } = useBetterSocket();
+    const { onError, offError, sendMessage } = useSocket();
 
     const onSubmit: SubmitHandler<CreateForm> = (data) => {
         // sendMessage("GET_GROUP_CHAT_INFO", {serverName: data.serverName});

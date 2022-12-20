@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int
     cors: str
     test_token: str
+    assets_folder: str
 
     class Config:
         env_file = ".env"

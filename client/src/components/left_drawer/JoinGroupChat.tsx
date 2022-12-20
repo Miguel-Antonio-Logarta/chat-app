@@ -2,11 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useBetterSocket } from "../../context/BetterSocketContext";
-import { useSocketContext } from "../../context/SocketContext";
-import ErrorMessageContainer from "../ErrorMessageContainer";
+import { useSocket } from "../../context/SocketContext";
 import ConfirmJoinGroupChat from "./ConfirmJoinGroupChat";
-// import { useSocket } from "../../context/BetterSocketContext";
 
 type JoinGroupChatProps = {
     showModal: any;
@@ -18,7 +15,7 @@ type JoinForm = {
 
 const JoinGroupChat = ({showModal}: JoinGroupChatProps) => {
     const { register, handleSubmit, setError, formState: { errors } } = useForm<JoinForm>();
-    const { on, off, onError, offError, sendMessage } = useBetterSocket();
+    const { on, off, onError, offError, sendMessage } = useSocket();
     const [confirming, setConfirming] = useState(false);
     const [roomInfo, setRoomInfo] = useState<any>({});
 

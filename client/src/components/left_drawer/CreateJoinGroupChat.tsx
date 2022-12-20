@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { MdClose } from 'react-icons/md';
-import { useBetterSocket } from '../../context/BetterSocketContext';
+import { useSocket } from '../../context/SocketContext';
 import { useChat } from '../../context/ChatAppContext';
 import Modal from '../Modal'
 import CreateGroupChat from './CreateGroupChat';
@@ -13,7 +13,7 @@ type Props = {
 
 const CreateJoinGroupChat = ({showSelf}: Props) => {
     const { groupChats, setGroupChats } = useChat();
-    const {on, off, sendMessage} = useBetterSocket();
+    const {on, off, sendMessage} = useSocket();
     const [createGroupChat, setCreateJoinGroupChat] = useState(true);
     const handleOnClose = (e: React.MouseEvent) => {
         e.preventDefault();

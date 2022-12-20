@@ -1,7 +1,7 @@
 import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { MdOutlineImage, MdTagFaces } from "react-icons/md";
-import { useBetterSocket } from "../../context/BetterSocketContext";
+import { useSocket } from "../../context/SocketContext";
 import { useChat } from "../../context/ChatAppContext";
 import { noBlankSpacesRegex } from "../../data/constants";
 
@@ -13,7 +13,7 @@ type SendMessageForm = {
 
 const SendMessage = (props: Props) => {
   // const { socket, isConnected, currentRoom } = useSocketContext();
-  const { sendMessage, isConnected } = useBetterSocket();
+  const { sendMessage, isConnected } = useSocket();
   const { currentChatRoom } = useChat();
   const { register, handleSubmit, reset } = useForm<SendMessageForm>();
 

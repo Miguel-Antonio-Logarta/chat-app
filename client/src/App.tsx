@@ -6,16 +6,13 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import NotFound from './pages/NotFound';
 import AuthProvider from './context/AuthContext';
 import ChatRoom from './pages/ChatRoom';
-import SocketProvider from './context/SocketContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ChatAppContextProvider } from './context/ChatAppContext';
-import BetterSocketProvider from './context/BetterSocketContext';
-// import WSProvider from './components/WSContext';
+import BetterSocketProvider from './context/SocketContext';
 
 function App() {
   return (
       <AuthProvider>
-        <SocketProvider>
           <BetterSocketProvider>
           <ChatAppContextProvider>
               <div className="App">
@@ -34,7 +31,6 @@ function App() {
               </div>
           </ChatAppContextProvider>
           </BetterSocketProvider>
-        </SocketProvider>
       </AuthProvider>
   );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { MdCheck, MdClose } from "react-icons/md";
-import { useBetterSocket } from "../../context/BetterSocketContext";
+import { useSocket } from "../../context/SocketContext";
 
 type FriendRequestItemProps = {
   username: string;
@@ -9,7 +9,7 @@ type FriendRequestItemProps = {
 };
 
 const FriendRequest = (props: FriendRequestItemProps) => {
-  const { sendMessage } = useBetterSocket();
+  const { sendMessage } = useSocket();
   const handleAccept = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     sendMessage("ACCEPT_FRIEND_REQUEST", { friend_id: props.userId });

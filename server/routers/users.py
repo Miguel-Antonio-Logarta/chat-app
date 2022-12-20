@@ -8,8 +8,10 @@ from database import get_db
 import models
 import config
 from auth import get_current_user
+from images import create_profile_picture
 
 router = APIRouter()
+
 
 @router.post("/users/signup", response_model=schemas.Token)
 async def create_user(new_user_data: schemas.CreateUser, db: Session = Depends(get_db)):
@@ -30,9 +32,10 @@ async def create_user(new_user_data: schemas.CreateUser, db: Session = Depends(g
             detail=errors
         )
     
+    profile_picture_path = create_profile_picture(new_user_data.username)
     # Hash the password and store in db
     new_user_data.password = auth.get_password_hash(new_user_data.password)
-    new_user = models.User(**new_user_data.dict())
+    new_user = models.User(**new_user_data.dict(), profile_picture=profile_picture_path)
     db.add(new_user)
     db.commit()
 

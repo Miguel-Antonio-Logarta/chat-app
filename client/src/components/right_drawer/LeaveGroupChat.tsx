@@ -1,7 +1,7 @@
 // import { off } from "process";
 import React, { useCallback, useEffect } from "react";
 import { MdClose } from "react-icons/md";
-import { useBetterSocket } from "../../context/BetterSocketContext";
+import { useSocket } from "../../context/SocketContext";
 import { useChat } from "../../context/ChatAppContext";
 import Modal from "../Modal";
 
@@ -11,7 +11,7 @@ type Props = {
 };
 
 const LeaveGroupChat = ({ showSelf, roomName }: Props) => {
-  const { sendMessage, on, off } = useBetterSocket();
+  const { sendMessage, on, off } = useSocket();
   const { currentChatRoom, setCurrentChatRoom } = useChat();
 
   const handleLeaveRoom = (e: React.MouseEvent) => {

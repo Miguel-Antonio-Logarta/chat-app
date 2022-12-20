@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { MdClose } from "react-icons/md";
-import { useBetterSocket } from "../../context/BetterSocketContext";
+import { useSocket } from "../../context/SocketContext";
 import Modal from "../Modal";
 import ConfirmSendFriendRequest from "./ConfirmSendFriendRequest";
 
@@ -16,10 +16,11 @@ type FriendForm = {
 type FriendDataType = {
     friendId: number;
     friendUsername: string;
+    friendProfilePicture: string;
 }
 
 const AddFriend = ({ showSelf }: Props) => {
-  const { on, off, sendMessage, onError, offError } = useBetterSocket();
+  const { on, off, sendMessage, onError, offError } = useSocket();
   const { register, handleSubmit, setError, formState: { errors } } = useForm<FriendForm>();
   const [friendData, setFriendData] = useState<FriendDataType | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -37,9 +38,11 @@ const AddFriend = ({ showSelf }: Props) => {
 
   useEffect(() => {
     const handleSendFriendRequest = (payload: any) => {
+      console.log(payload);
         setFriendData({
             friendId: payload.friendId,
-            friendUsername: payload.username
+            friendUsername: payload.friendUsername,
+            friendProfilePicture: payload.profilePicture
         })
         setConfirming(true);
     }
@@ -60,7 +63,8 @@ const AddFriend = ({ showSelf }: Props) => {
   if (confirming && friendData) {
     return <ConfirmSendFriendRequest 
                 friendId={friendData.friendId} 
-                friendUsername={friendData.friendUsername} 
+                friendUsername={friendData.friendUsername}
+                friendProfilePicture={friendData.friendProfilePicture} 
                 cancelFriendRequest={() => setConfirming(false)}
                 confirmFriendRequest={() => showSelf(false)}
             />

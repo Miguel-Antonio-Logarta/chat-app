@@ -1,17 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { MdClose } from 'react-icons/md';
-import { useBetterSocket } from '../../context/BetterSocketContext';
+import { useSocket } from '../../context/SocketContext';
 import Modal from '../Modal';
 
 type Props = {
     friendId: number;
     friendUsername: string; 
+    friendProfilePicture: string;
     cancelFriendRequest: () => void;
     confirmFriendRequest: () => void;
 }
 
 const ConfirmSendFriendRequest = ({confirmFriendRequest, ...props}: Props) => {
-    const { sendMessage, onError, offError, on, off } = useBetterSocket();
+    const { sendMessage, onError, offError, on, off } = useSocket();
     const [error, setError] = useState<string | null>(null);
 
     const handleSendFriendRequest = (e: React.MouseEvent) => {
@@ -48,7 +49,11 @@ const ConfirmSendFriendRequest = ({confirmFriendRequest, ...props}: Props) => {
             <MdClose />
           </button>
           <div className="join-prompt">
-            <div className="large-server-icon"></div>
+            <img src={props.friendProfilePicture} alt={props.friendUsername} className="large-server-icon" />
+            {/* {props.friendProfilePicture ? 
+              <img src={props.friendProfilePicture} alt={props.friendUsername} className="large-server-icon" /> : 
+              <div className="large-server-icon"></div>
+            } */}
             <h2>{props.friendUsername}</h2>
             <p>Send this person a friend request?</p>
             <div className="join-buttons">

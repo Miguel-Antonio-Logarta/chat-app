@@ -1,7 +1,7 @@
 // import React from 'react'
 import React from "react";
 import { MdClose } from "react-icons/md";
-import { useBetterSocket } from "../../context/BetterSocketContext";
+import { useSocket } from "../../context/SocketContext";
 import Modal from "../Modal";
 
 // There are two close events we should pass as props
@@ -15,7 +15,7 @@ type Props = {
 };
 
 const CofirmJoinGroupChat = (props: Props) => {
-  const { sendMessage } = useBetterSocket();
+  const { sendMessage } = useSocket();
 
   const handleJoin = (e: React.MouseEvent) => {
     sendMessage("CONFIRM_JOIN_GROUP_CHAT", { roomId: props.roomId });

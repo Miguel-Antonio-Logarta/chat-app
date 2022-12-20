@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Enum, UniqueConstraint
+from sqlalchemy import Enum, Text, UniqueConstraint
 from sqlalchemy import BigInteger, Boolean, Column, ForeignKey, Integer, String, Date, TIMESTAMP
 from sqlalchemy.sql.expression import text
 from database import Base
@@ -21,6 +21,7 @@ class User(Base):
         nullable=False,
         server_default=text('now()')
     )
+    profile_picture = Column(Text, nullable=True)
 
 
 class Message(Base):

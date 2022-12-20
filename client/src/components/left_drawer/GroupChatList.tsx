@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { AiOutlinePlus } from 'react-icons/ai';
 import { useChat } from '../../context/ChatAppContext';
-import { useSocketContext } from '../../context/SocketContext';
-import { camelCaseKeys } from '../../utils/Utilities';
 import CreateJoinGroupChat from './CreateJoinGroupChat';
 import GroupChatItem from './GroupChatItem';
 
@@ -14,7 +12,6 @@ const GroupChatList = (props: GroupChatListProps) => {
 
     return(
       <>
-        {/* {<ConfirmAddGroupChat showSelf={setCreateJoinGroupChat} roomName={"test room"}/>} */}
         {createJoinGroupChat && <CreateJoinGroupChat showSelf={setCreateJoinGroupChat} />}
         <div className='upper-chat-list'>
           <h2>My Group Chats</h2>

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Friend, FriendRequest, GroupChat } from "../types";
-import { useBetterSocket } from "./BetterSocketContext";
+import { useSocket } from "./SocketContext";
 
 type ChatAppContextProviderProps = {
     children?: React.ReactNode;
@@ -34,7 +34,7 @@ export const ChatAppContext = createContext<ChatAppContextType>(null!);
 export const useChat = () => useContext(ChatAppContext);
 export const ChatAppContextProvider = ({children}: ChatAppContextProviderProps) => {
     // Holds the global state and handles authentication and web socket
-    const { on, off, sendMessage, socket } = useBetterSocket();
+    const { on, off, sendMessage, socket } = useSocket();
 
     const [friends, setFriends] = useState<Friend[]>([]);
     const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
@@ -50,13 +50,77 @@ export const ChatAppContextProvider = ({children}: ChatAppContextProviderProps) 
         })
     }, [socket, sendMessage]);
 
+    // Handles group chats
     useEffect(() => {
-        // TODO: Add listeners for updates to group chats, friends, and friend requests (ex: Someone rejects/accepts your friend request or you get invited to a group chat)
         const handleGroupChats = (payload: GroupChat[]) => {
             console.log("Group Chats", payload);
             setGroupChats(payload);
         }
 
+        const handleCreateGroupChat = (payload: any) => {
+            setGroupChats((groupChats: GroupChat[]) => [
+                ...groupChats, 
+                {
+                    roomId: payload.roomId,
+                    name: payload.name,
+                    isGroupChat: payload.isGroupChat,
+                    createdOn: payload.createdOn
+                }
+            ])
+        }
+
+        const handleLeaveGroupChat = (payload: any) => {
+            setCurrentChatRoom(null);
+            setGroupChats((groupChats: GroupChat[]) => 
+                groupChats.filter((room: any) => room.roomId !== payload.roomId)
+            );
+        }
+
+        const handleConfirmJoinGroupChat = (payload: any) => {
+            setGroupChats((groupChats: GroupChat[]) => [
+                ...groupChats, 
+                {
+                    roomId: payload.roomId,
+                    name: payload.name,
+                    isGroupChat: payload.isGroupChat,
+                    createdOn: payload.createdOn
+                }
+            ])
+        }
+
+        const handleInvitedToGroupChat = (payload: any) => {
+            setGroupChats((groupChats: GroupChat[]) => [
+                ...groupChats, 
+                {
+                    roomId: payload.roomId,
+                    name: payload.name,
+                    isGroupChat: payload.isGroupChat,
+                    createdOn: payload.createdOn
+                }
+            ])
+        }
+
+        on("GET_GROUP_CHATS", handleGroupChats);
+        // on("LEAVE_ROOM", handleLeaveRoom); <- we don't need this anymore
+        on("CREATE_GROUP_CHAT", handleCreateGroupChat);
+        on("CONFIRM_JOIN_GROUP_CHAT", handleConfirmJoinGroupChat);
+        on("LEAVE_GROUP_CHAT", handleLeaveGroupChat);
+        on("INVITED_TO_GROUP_CHAT", handleInvitedToGroupChat);
+        // on("INVITE_TO_GROUP_CHAT",) <- Only adds a new member to a group chat
+        // on("GET_ROOM_INFO",)
+        // on("JOIN_GROUP_CHAT",) <- this only grabs info, and doesn't change state of group chats
+
+        return () => {
+            off("GET_GROUP_CHATS", handleGroupChats);
+            off("CREATE_GROUP_CHAT", handleCreateGroupChat);
+            off("LEAVE_GROUP_CHAT", handleLeaveGroupChat);
+            off("CONFIRM_JOIN_GROUP_CHAT", handleConfirmJoinGroupChat);
+            off("INVITED_TO_GROUP_CHAT", handleInvitedToGroupChat);
+        }
+    }, [sendMessage, on, off])
+
+    // Handles friends and friend requests
+    useEffect(() => {
         const handleGetFriends = (payload: Friend[]) => {
             console.log("Friends", payload);
             setFriends(payload);
@@ -67,36 +131,60 @@ export const ChatAppContextProvider = ({children}: ChatAppContextProviderProps) 
             setFriendRequests(payload);
         }
 
-        const handleLeaveRoom = (payload: any) => {
-            setGroupChats((groupChats: any) => 
-                groupChats.filter((room: any) => room.roomId !== payload.roomId)
-            );
+        const handleAcceptFriendRequest = (payload: any) => {
+            // Add new friend
+            setFriends((friends) => [
+                ...friends,
+                {
+                    userId: payload.friendId,
+                    username: payload.friendUsername,
+                    roomId: payload.roomId
+                }
+            ])
+
+            // Remove friend request since it has now been accepted.
+            // This should handled in the friend request component
+            setFriendRequests((friendRequests: FriendRequest[]) => 
+                friendRequests.filter((friendRequest: FriendRequest) => friendRequest.userId !== payload.friendId));
         }
 
-        const handleNewFriend = (payload: any) => {
-            setFriends((friends) => [
-              ...friends,
-              {
-                userId: payload.friendId,
-                username: payload.friendUsername,
-                roomId: payload.roomId
-              }
+        const handleReceiveFriendRequest = (payload: any) => {
+            setFriendRequests((friendRequests: FriendRequest[]) => [
+                ...friendRequests,
+                {
+                    userId: payload.id,
+                    username: payload.username,
+                    createdOn: payload.createdOn
+                }
             ])
-          }
+        }
 
-        on("GET_GROUP_CHATS", handleGroupChats);
+        const handleFriendRequestAccepted = (payload: any) => {
+            setFriends((friends) => [
+                ...friends,
+                {
+                    userId: payload.friendId,
+                    username: payload.friendUsername,
+                    roomId: payload.roomId
+                }
+            ])
+        }
+
         on("GET_FRIENDS", handleGetFriends);
         on("GET_FRIEND_REQUESTS", handleGetFriendRequests);
-        on("LEAVE_ROOM", handleLeaveRoom);
-        on("ACCEPT_FRIEND_REQUEST", handleNewFriend);
-        
-        return () => {
-            off("GET_GROUP_CHATS", handleGroupChats);
-            off("GET_FRIENDS", handleGetFriends);
-            off("GET_FRIEND_REQUESTS", handleGetFriendRequests);
-            off("LEAVE_ROOM", handleLeaveRoom);
-            off("ACCEPT_FRIEND_REQUEST", handleNewFriend);
-        }
+        on("ACCEPT_FRIEND_REQUEST", handleAcceptFriendRequest);
+        on("RECEIVE_FRIEND_REQUEST", handleReceiveFriendRequest);
+        on("FRIEND_REQUEST_ACCEPTED", handleFriendRequestAccepted);
+        // on("CREATE_FRIEND_CHAT",)
+
+    
+      return () => {
+        off("GET_FRIENDS", handleGetFriends);
+        off("GET_FRIEND_REQUESTS", handleGetFriendRequests);
+        off("ACCEPT_FRIEND_REQUEST", handleAcceptFriendRequest);
+        off("RECEIVE_FRIEND_REQUEST", handleReceiveFriendRequest);
+        off("FRIEND_REQUEST_ACCEPTED", handleFriendRequestAccepted);
+      }
     }, [sendMessage, on, off])
 
     const value = {

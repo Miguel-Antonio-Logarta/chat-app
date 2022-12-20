@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { ImExit } from "react-icons/im"
 import { MdPersonAddAlt } from "react-icons/md"
-import { camelCaseKeys, snakeCaseKeys } from "../../utils/Utilities";
 import GroupMembersStatus from "./GroupMembersStatus";
-import { useSocketContext } from "../../context/SocketContext";
 import LeaveGroupChat from "./LeaveGroupChat";
 import InviteGroupMembers from "./InviteGroupMembers";
-import { useBetterSocket } from "../../context/BetterSocketContext";
+import { useSocket } from "../../context/SocketContext";
 import { useChat } from "../../context/ChatAppContext";
 
 type Props = {};
@@ -14,7 +12,7 @@ type Props = {};
 const ChatRoomInformation = (props: Props) => {
   // const {socket, isConnected, currentRoom, setCurrentRoom} = useSocketContext();
   const {currentChatRoom, setCurrentChatRoom} = useChat();
-  const { sendMessage, on, off } = useBetterSocket();
+  const { sendMessage, on, off } = useSocket();
   // const [roomName, setRoomName] = useState("");
   // const [onlineUsers, setOnlineUsers] = useState([]);
   // const [offlineUsers, setOfflineUsers] = useState([]);
@@ -35,22 +33,6 @@ const ChatRoomInformation = (props: Props) => {
       off("GET_ROOM_INFO", handleGettingChatInfo);
     }
   }, [off, on, setCurrentChatRoom]);
-
-  // useEffect(() => {
-  //   if (isConnected) {
-  //     socket.addEventListener("message", (event) => {
-  //       const data = camelCaseKeys(JSON.parse(event.data));
-  //       console.log(data);
-  //       if (data.type === "GET_ROOM_INFO") {
-  //         setRoomName(data.payload.roomName);
-  //         setOnlineUsers(data.payload.onlineUsers);
-  //         setOfflineUsers(data.payload.offlineUsers);
-  //         setCurrentRoom(data.payload.roomId);
-  //       }
-  //       // setRoomName(data.)
-  //     })
-  //   }
-  // }, [socket, isConnected, setCurrentRoom])
 
   if (currentChatRoom == null) {
     return (

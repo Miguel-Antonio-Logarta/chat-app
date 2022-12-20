@@ -1384,6 +1384,12 @@ header nav ul li a {
     width: 60px;
 }
 
+.friend-icon img {
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+}
+
 .friend-icon.online::after, .friend-icon.offline::after {
     content: "";
     display: block;
@@ -1392,7 +1398,7 @@ header nav ul li a {
     width: 16px;
     height: 16px;
     left: 40px;
-    top: 40px;
+    top: -24px;
     /* bottom: 0; */
     /* right: 0; */
     border: 4px solid var(--darker-desaturated-blue);

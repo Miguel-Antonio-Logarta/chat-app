@@ -78,7 +78,8 @@ async def send_friend_request(websocket: WebSocket,
         "type": "SEND_FRIEND_REQUEST",
         "payload": {
             "friend_username": db_friend_user.username,
-            "friend_id": db_friend_user.id
+            "friend_id": db_friend_user.id,
+            "friend_profile_picture": db_friend_user.profile_picture
         }
     })
 
@@ -173,7 +174,8 @@ async def confirm_send_friend_request(websocket: WebSocket,
                     "type": "RECEIVE_FRIEND_REQUEST",
                         "payload": {
                         "username": user.username,
-                        "user_id": user.id
+                        "user_id": user.id,
+                        "created_on": db_friend_request.created_on.isoformat()
                     }   
                 }
             )
@@ -277,7 +279,7 @@ async def accept_friend_request(websocket: WebSocket,
 
     # Sends a message to the friend that their friend request was accepted
     await manager.send_message_to([friend.friend_id], {
-        "type": "ACCEPT_FRIEND_REQUEST",
+        "type": "FRIEND_REQUEST_ACCEPTED",
         "payload": {
             "friend_id": user.id,
             "friend_username": user.username,
