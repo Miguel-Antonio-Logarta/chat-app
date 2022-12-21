@@ -9,9 +9,10 @@ import models
 import config
 from auth import get_current_user
 from images import create_profile_picture
+from s3 import S3Manager
 
 router = APIRouter()
-
+s3_manager = S3Manager()
 
 @router.post("/users/signup", response_model=schemas.Token)
 async def create_user(new_user_data: schemas.CreateUser, db: Session = Depends(get_db)):
@@ -23,7 +24,7 @@ async def create_user(new_user_data: schemas.CreateUser, db: Session = Depends(g
 
     # Check if the email is already taken
     email_exists = db.query(models.User).filter(models.User.email == new_user_data.email).first()
-    if email_exists is not None:
+    if email_exists is not None and email_exists.email != "":
         errors["email"] = "Email already exists"
     
     if errors:
@@ -32,12 +33,15 @@ async def create_user(new_user_data: schemas.CreateUser, db: Session = Depends(g
             detail=errors
         )
     
-    profile_picture_path = create_profile_picture(new_user_data.username)
     # Hash the password and store in db
     new_user_data.password = auth.get_password_hash(new_user_data.password)
-    new_user = models.User(**new_user_data.dict(), profile_picture=profile_picture_path)
+    # new_user = models.User(**new_user_data.dict(), profile_picture=profile_picture_path)
+    new_user = models.User(**new_user_data.dict())
     db.add(new_user)
     db.commit()
+    # db.refresh(new_user)
+
+    create_profile_picture(new_user.username, new_user.id, s3_manager)
 
     # Return a token since the user will automatically log in after signing up
     access_token = auth.create_access_token(data={"user_id": new_user.id, "username": new_user.username})

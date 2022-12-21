@@ -28,7 +28,7 @@ def startup_event():
         db.query(models.OnlineUser).delete()
         db.commit()
 
-@app.post("/user/profile_picture")
-def test_create_profile_picture():
-    # Creates an image with a gradient
-    pass
+# @app.post("/user/profile_picture")
+# def test_create_profile_picture():
+#     # Creates an image with a gradient
+#     pass

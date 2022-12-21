@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     cors: str
     test_token: str
     assets_folder: str
+    s3_bucket_name: str
+    s3_base_object_url: str
+    s3_profile_images_location: str
 
     class Config:
         env_file = ".env"

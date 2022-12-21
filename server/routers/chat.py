@@ -12,7 +12,7 @@ from errors import WebSocketEventException
 # from server.chat_events import get_group_chats
 
 router = APIRouter()
-manager = ConnectionManager()
+connection_manager = ConnectionManager()
 
 @router.websocket("/ws")
 async def websocket_endpoint(
@@ -26,7 +26,7 @@ async def websocket_endpoint(
         return await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
 
     # await manager.connect(websocket)
-    await manager.connect(websocket, user, db)
+    await connection_manager.connect(websocket, user, db)
 
     while True:
         try:
@@ -34,60 +34,60 @@ async def websocket_endpoint(
             parsed_data = schemas.WSDataReceive(**json.loads(data))
             match parsed_data.type:
                 # case "PING":
-                #     await chat_events.pong(websocket, manager)
+                #     await chat_events.pong(websocket, connection_manager)
                 case "SEND_MESSAGE":
                     message = schemas.SendMessage(**parsed_data.payload)
-                    await chat_events.send_message(websocket, message, user, db, manager)
+                    await chat_events.send_message(websocket, message, user, db, connection_manager)
                 case "GET_MESSAGES":
                     room = schemas.Room(**parsed_data.payload)
-                    await chat_events.get_messages(websocket, room, user, db, manager)
+                    await chat_events.get_messages(websocket, room, user, db, connection_manager)
                 case "GET_ROOMS":
-                    await chat_events.get_rooms(websocket, user, db, manager)
+                    await chat_events.get_rooms(websocket, user, db, connection_manager)
                 case "GET_ROOM_INFO":
                     room = schemas.Room(**parsed_data.payload)
-                    await chat_events.get_room_info(websocket, room, user, db, manager)
+                    await chat_events.get_room_info(websocket, room, user, db, connection_manager)
                 case "GET_GROUP_CHATS":
-                    await chat_events.get_group_chats(websocket, user, db, manager)
+                    await chat_events.get_group_chats(websocket, user, db, connection_manager)
                 case "CREATE_GROUP_CHAT":
                     new_room = schemas.CreateRoom(**parsed_data.payload)
-                    await chat_events.create_group_chat(websocket, new_room, user, db, manager)
+                    await chat_events.create_group_chat(websocket, new_room, user, db, connection_manager)
                 case "LEAVE_GROUP_CHAT":
                     room = schemas.Room(**parsed_data.payload)
-                    await chat_events.leave_group_chat(websocket, room, user, db, manager)
+                    await chat_events.leave_group_chat(websocket, room, user, db, connection_manager)
                 case "JOIN_GROUP_CHAT":
                     room = schemas.Room(**parsed_data.payload)
-                    await chat_events.join_group_chat(websocket, room, user, db, manager)
+                    await chat_events.join_group_chat(websocket, room, user, db, connection_manager)
                 case "CONFIRM_JOIN_GROUP_CHAT":
                     room = schemas.Room(**parsed_data.payload)
-                    await chat_events.confirm_join_group_chat(websocket, room, user, db, manager)
+                    await chat_events.confirm_join_group_chat(websocket, room, user, db, connection_manager)
                 case "INVITE_TO_GROUP_CHAT":
                     invite = schemas.InviteToGroupChat(**parsed_data.payload)
-                    await chat_events.invite_friend_to_group_chat(websocket, invite, user, db, manager)
+                    await chat_events.invite_friend_to_group_chat(websocket, invite, user, db, connection_manager)
                 case "GET_FRIENDS":
-                    await chat_events.get_friends(websocket, user, db, manager)
+                    await chat_events.get_friends(websocket, user, db, connection_manager)
                 case "GET_FRIEND_REQUESTS": 
-                    await chat_events.get_friend_requests(websocket, user, db, manager)
+                    await chat_events.get_friend_requests(websocket, user, db, connection_manager)
                 case "SEND_FRIEND_REQUEST":
                     friend = schemas.Friend(**parsed_data.payload)
-                    await chat_events.send_friend_request(websocket, friend, user, db, manager)
+                    await chat_events.send_friend_request(websocket, friend, user, db, connection_manager)
                 case "CONFIRM_SEND_FRIEND_REQUEST":
                     friend = schemas.Friend(**parsed_data.payload)
-                    await chat_events.confirm_send_friend_request(websocket, friend, user, db, manager)
+                    await chat_events.confirm_send_friend_request(websocket, friend, user, db, connection_manager)
                 case "ACCEPT_FRIEND_REQUEST":
                     friend = schemas.Friend(**parsed_data.payload)
-                    await chat_events.accept_friend_request(websocket, friend, user, db, manager)
+                    await chat_events.accept_friend_request(websocket, friend, user, db, connection_manager)
                 case "REJECT_FRIEND_REQUEST":
                     friend = schemas.Friend(**parsed_data.payload)
-                    await chat_events.reject_friend_request(websocket, friend, user, db, manager)
+                    await chat_events.reject_friend_request(websocket, friend, user, db, connection_manager)
                 case _:
                     await websocket.send_json({"type": "NOT_FOUND", "payload": "No matching event"})
         except WebSocketEventException as err:
-            await manager.send_personal_message(websocket, {
+            await connection_manager.send_personal_message(websocket, {
                 "type": "ERROR",
                 "payload": err.as_payload()
             })
         except ValidationError as err:
-            await manager.send_personal_message(websocket, {
+            await connection_manager.send_personal_message(websocket, {
                 "type": "ERROR",
                 "payload": json.loads(err.json())
             })
@@ -95,6 +95,6 @@ async def websocket_endpoint(
             continue
         except WebSocketDisconnect:
             print("User has disconnected")
-            manager.disconnect(user, db)
+            connection_manager.disconnect(user, db)
             return
 
