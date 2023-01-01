@@ -6,6 +6,7 @@ import LeaveGroupChat from "./LeaveGroupChat";
 import InviteGroupMembers from "./InviteGroupMembers";
 import { useSocket } from "../../context/SocketContext";
 import { useChat } from "../../context/ChatAppContext";
+import GroupChatIcon from "../GroupChatIcon";
 
 type Props = {};
 
@@ -52,7 +53,12 @@ const ChatRoomInformation = (props: Props) => {
           <div className="main-chat-info">
             <div className="group-chat-summary">
               <div className="large-server-icon-wrapper">
-                <div className="large-server-icon"></div>
+                {/* <div className="large-server-icon"></div> */}
+                <GroupChatIcon 
+                  className='large-server-icon' 
+                  groupChatId={currentChatRoom.roomId} 
+                  groupChatName={currentChatRoom.roomName}
+                />
               </div>
               <h2>{currentChatRoom.roomName}</h2>
               <p>{currentChatRoom.onlineUsers.length + currentChatRoom.offlineUsers.length} Members</p>

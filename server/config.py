@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     s3_bucket_name: str
     s3_base_object_url: str
     s3_profile_images_location: str
+    s3_gc_icon_location: str
 
     class Config:
         env_file = ".env"

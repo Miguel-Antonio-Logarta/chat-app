@@ -202,11 +202,27 @@ header nav ul li a {
     background-color: var(--off-white);
 }
 
+.circle .profile-picture {
+    height: 40px;
+    aspect-ratio: 1/1;
+    margin: inherit;
+}
+
 .profile {
     display: grid;
+    grid-template-areas: 
+        "pfp username";
     grid-template-columns: max-content auto;
     column-gap: 22px;
     align-items: center;
+}
+
+.profile .profile-picture {
+    grid-area: pfp;
+}
+
+.profile a {
+    grid-area: username;
 }
 
 .logout-section button {
@@ -1305,8 +1321,9 @@ header nav ul li a {
     word-wrap: break-word;      /* IE */
 }
 
-.friend-request-item>.circle {
+.friend-request-item>.profile-picture {
     height: 60px;
+    grid-area: auto;
 }
 
 .accept-friend, .reject-friend {

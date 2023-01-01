@@ -12,6 +12,8 @@ Contains functions that handle events regarding rooms (private chats and group c
 """
 import models
 import schemas
+import images
+from s3 import S3Manager
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from fastapi import WebSocket
@@ -61,13 +63,16 @@ async def get_rooms(websocket: WebSocket, user: models.User, db: Session, manage
         "payload": rooms_out
     })
 
-async def create_group_chat(websocket: WebSocket, new_room: schemas.CreateRoom, user: models.User, db: Session, manager: ConnectionManager):
+async def create_group_chat(websocket: WebSocket, new_room: schemas.CreateRoom, user: models.User, db: Session, manager: ConnectionManager, s3: S3Manager):
     """Creates a group chat with user as the participant"""
     # Create a room
     db_room = models.Room(**new_room.dict(), is_group_chat=True)
     db.add(db_room)
     db.commit()
     db.refresh(db_room)
+
+    # Creates an icon for the group chat 
+    images.create_group_chat_icon(db_room.name, db_room.id, s3)
 
     # Put user id and room id in participant
     db_participant = models.Participant(user_id=user.id, room_id=db_room.id)

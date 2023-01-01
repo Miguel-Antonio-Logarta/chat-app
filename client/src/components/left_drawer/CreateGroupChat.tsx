@@ -53,7 +53,7 @@ const CreateGroupChat = (props: CreateGroupChatProps) => {
             </label>
 
             <label className="server-name-text" htmlFor='serverName'>Server Name</label>
-            <input className="server-name" {...register("serverName", {required: true})}></input>
+            <input className="server-name" {...register("serverName", {required: true, minLength: {value: 4, message: "The name must have at least 4 characters"}})}></input>
             {errors.serverName?.message && <p className="error-message">{errors.serverName?.message}</p>}
             <button>Create Group Chat</button>
         </form>

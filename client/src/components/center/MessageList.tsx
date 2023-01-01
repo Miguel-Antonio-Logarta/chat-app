@@ -10,6 +10,7 @@ type MessageListProps = {};
 type MessageItem = {
   id: number;
   username: string;
+  userId: number;
   message: string;
   timestamp: string;
 };
@@ -17,7 +18,7 @@ type MessageItem = {
 const MessageList = (props: MessageListProps) => {
   const [messages, setMessages] = useState<MessageItem[]>([]);
   // const [roomName, setRoomName] = useState<string>("");
-  const { username } = useAuth();
+  const { username, userId } = useAuth();
   // const { socket, isConnected, currentRoom } = useSocketContext();
   const { currentChatRoom } = useChat();
   const { on, off, sendMessage } = useSocket();
@@ -41,6 +42,7 @@ const MessageList = (props: MessageListProps) => {
         {
           id: payload.id,
           username: payload.username,
+          userId: userId,
           message: payload.message,
           timestamp: payload.timestamp,
         },
@@ -86,6 +88,7 @@ const MessageList = (props: MessageListProps) => {
             key={message.id}
             id={message.id}
             username={message.username}
+            userId={message.userId}
             message={message.message}
             timestamp={message.timestamp}
             placeRight={message.username === username}

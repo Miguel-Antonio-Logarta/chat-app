@@ -1,10 +1,12 @@
 import React from "react";
 import dayjs from "dayjs";
 import TimestampSeparator from "./TimestampSeparator";
+import ProfileImage from "../ProfileImage";
 
 type MessageProps = {
   id: number;
   username: string;
+  userId: number;
   message: string;
   timestamp: string;
   placeRight: boolean;
@@ -38,6 +40,7 @@ const findSpacing = (
 const Message = ({
   id,
   username,
+  userId,
   message,
   timestamp,
   placeRight,
@@ -56,7 +59,9 @@ const Message = ({
     <>
       <TimestampSeparator timestamp={timestamp} lastTimestamp={lastTimestamp} />
       <div className={`message ${placeRight && `owner`} ${spacingType}`}>
-        <div className="profile-picture"></div>
+        {/* <div className="profile-picture"></div> */}
+        {/* ERROR HERE: We need the sender's ID instead of message ID */}
+        <ProfileImage className="profile-picture" username={username} id={userId} />
         <p className="username">{username}</p>
         {spacingType !== "small-msg-margin" && (
           <p className="timestamp">sent: {readableTime}</p>

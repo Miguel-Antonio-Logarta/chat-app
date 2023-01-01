@@ -1,6 +1,7 @@
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useSocket } from "../../context/SocketContext";
+import ProfileImage from "../ProfileImage";
 
 type FriendProps = {
   id: number;
@@ -28,8 +29,8 @@ const Friend = (props: FriendProps) => {
       <div
         className={`friend-icon ${props.online ? "online" : "offline"}`}
       >
-        {/* ${process.env.PUBLIC_URL}/assets/images/uc-white.png */}
-        <img src={require(`../../assets/images/a3sdlkfjadf.png`)} alt={props.username} />
+        {/* <img src={`${process.env.REACT_APP_S3_BASE_OBJECT_URL}${process.env.REACT_APP_S3_PROFILE_IMAGES_LOCATION}${props.id}`} alt={props.username} /> */}
+        <ProfileImage id={props.id} username={props.username}/>
       </div>
       <div className="friend-info">
         <h4>{props.username}</h4>

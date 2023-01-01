@@ -1,4 +1,5 @@
 import React from "react";
+import ProfileImage from "../ProfileImage";
 
 type Props = {
   className: string;
@@ -18,7 +19,8 @@ const GroupMembersStatus = (props: Props) => {
         {props.groupMembers.map((member) => (
           <React.Fragment key={member.userId}>
             <div className="group-chat-member">
-              <div className="profile-picture"></div>
+              {/* <div className="profile-picture"></div> */}
+              <ProfileImage className="profile-picture" id={member.userId} username={member.username} />
               <h4>{member.username}</h4>
             </div>
           </React.Fragment>

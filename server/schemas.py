@@ -91,6 +91,8 @@ class CreateRoom(BaseModel):
     def check_name_length(cls, v):
         if len(v) > 64:
             raise ValueError('Group chat name is too long')
+        elif len(v) < 4:
+            raise ValueError("Group chat name is too short")
         else:
             return v
 

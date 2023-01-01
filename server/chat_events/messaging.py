@@ -74,6 +74,7 @@ async def get_messages(websocket: WebSocket, room: schemas.Room, user: models.Us
         messages_out.append({
             "id": db_message.id,
             "username": db_user.username,
+            "user_id": db_message.user_id,
             "message": db_message.message,
             "timestamp": db_message.created_on.isoformat()
         })

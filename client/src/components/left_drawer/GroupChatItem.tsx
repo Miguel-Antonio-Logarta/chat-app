@@ -1,5 +1,6 @@
 import React from 'react'
 import { useSocket } from '../../context/SocketContext';
+import GroupChatIcon from '../GroupChatIcon';
 
 
 type GroupChatItemProps = {
@@ -22,7 +23,8 @@ const GroupChatItem = (props: GroupChatItemProps) => {
     
     return (
       <div onClick={handleClick} className='server-overview'>
-        <div className='server-icon'></div>
+        {/* <div className='server-icon'></div> */}
+        <GroupChatIcon className='server-icon' groupChatName={props.roomName} groupChatId={props.roomId} />
         <div className='server-info'>
           <h4>{props.roomName}</h4>
           <p>{props.description}@##:##</p>

@@ -9,10 +9,12 @@ from auth import ws_get_current_user
 import chat_events
 from connection_manager import ConnectionManager
 from errors import WebSocketEventException
+from s3 import S3Manager
 # from server.chat_events import get_group_chats
 
 router = APIRouter()
 connection_manager = ConnectionManager()
+s3_manager = S3Manager()
 
 @router.websocket("/ws")
 async def websocket_endpoint(
@@ -50,7 +52,7 @@ async def websocket_endpoint(
                     await chat_events.get_group_chats(websocket, user, db, connection_manager)
                 case "CREATE_GROUP_CHAT":
                     new_room = schemas.CreateRoom(**parsed_data.payload)
-                    await chat_events.create_group_chat(websocket, new_room, user, db, connection_manager)
+                    await chat_events.create_group_chat(websocket, new_room, user, db, connection_manager, s3_manager)
                 case "LEAVE_GROUP_CHAT":
                     room = schemas.Room(**parsed_data.payload)
                     await chat_events.leave_group_chat(websocket, room, user, db, connection_manager)
