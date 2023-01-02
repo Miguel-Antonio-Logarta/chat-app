@@ -1,5 +1,6 @@
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useChat } from "../../context/ChatAppContext";
 import { useSocket } from "../../context/SocketContext";
 import ProfileImage from "../ProfileImage";
 
@@ -14,6 +15,8 @@ type FriendProps = {
 const Friend = (props: FriendProps) => {
   const { sendMessage } = useSocket();
   const { username } = useAuth();
+  const { currentChatRoom } = useChat();
+
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (props.roomId) {
@@ -25,7 +28,7 @@ const Friend = (props: FriendProps) => {
   };
 
   return (
-    <div onClick={handleClick} className="friend-overview">
+    <div onClick={handleClick} className={`friend-overview ${currentChatRoom?.roomId === props.roomId ? "active" : ""}`}>
       <div
         className={`friend-icon ${props.online ? "online" : "offline"}`}
       >

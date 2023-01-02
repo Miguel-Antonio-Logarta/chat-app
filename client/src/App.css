@@ -551,6 +551,7 @@ header nav ul li a {
     border-radius: 16px;
     background: var(--darker-desaturated-blue);
     row-gap: 16px;
+    /* min-height: 72px; */
 }
 
 .group-chat-member {
@@ -678,6 +679,7 @@ header nav ul li a {
 .message.owner .message-content p {
     float: right;
     border-radius: 8px 0 8px 8px;
+    height: 100%;
 }
 
 .timestamp {
@@ -831,6 +833,10 @@ header nav ul li a {
 
 .server-overview:hover {
     cursor: pointer;
+    background-color: var(--dark-desaturated-blue);
+}
+
+.server-overview.active {
     background-color: var(--dark-desaturated-blue);
 }
 
@@ -1394,6 +1400,11 @@ header nav ul li a {
     background: var(--dark-desaturated-blue);
 }
 
+.friend-overview.active {
+    background: var(--dark-desaturated-blue);
+    /* border: 2px solid var(--dark-desaturated-blue); */
+}
+
 .friend-icon {
     border-radius: 50%;
     background: var(--off-white);
@@ -1636,6 +1647,10 @@ header nav ul li a {
     .chat-room-info-bottom {
         display: none;
     } */
+}
+
+.invisible {
+    visibility: hidden;
 }
 
 @media (max-width: 900px) {

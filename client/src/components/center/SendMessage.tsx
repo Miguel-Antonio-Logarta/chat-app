@@ -38,6 +38,7 @@ const SendMessage = (props: Props) => {
       </button>
       <input
         {...register("message", {
+          required: true,
           disabled: currentChatRoom == null ? true : false,
           pattern: noBlankSpacesRegex
         })}

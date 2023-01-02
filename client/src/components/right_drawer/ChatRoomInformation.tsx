@@ -64,8 +64,8 @@ const ChatRoomInformation = (props: Props) => {
               <p>{currentChatRoom.onlineUsers.length + currentChatRoom.offlineUsers.length} Members</p>
             </div>
             <button className="invite-member" onClick={() => setInviteMembers(true)}><MdPersonAddAlt className="mdpersonadd-icon"/>Invite People</button>
-            <GroupMembersStatus className="online-users" groupMembers={currentChatRoom.onlineUsers} title="Online" />
-            <GroupMembersStatus className="offline-users" groupMembers={currentChatRoom.offlineUsers} title="Offline" />
+            {currentChatRoom.onlineUsers.length > 0 && <GroupMembersStatus className="online-users" groupMembers={currentChatRoom.onlineUsers} title="Online" />}
+            {currentChatRoom.offlineUsers.length > 0 && <GroupMembersStatus className="offline-users" groupMembers={currentChatRoom.offlineUsers} title="Offline" />}
             <button className="leave-group" onClick={() => setLeavingGroupChat(true)}><ImExit />Leave Group Chat</button>
           </div>
           <div className="chat-room-info-bottom"></div>

@@ -60,7 +60,7 @@ const MessageList = (props: MessageListProps) => {
       off("SEND_MESSAGE", addMessage)
       off("GET_MESSAGES", handleGettingMessages)
     }
-  }, [on, off])
+  }, [on, off, userId])
 
   useEffect(() => {
     // TODO: Check if previous state messages was empty.

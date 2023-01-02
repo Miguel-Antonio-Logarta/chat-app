@@ -56,7 +56,7 @@ const JoinGroupChat = ({showModal}: JoinGroupChatProps) => {
             <div className='join-group-chat-prompt'>
                 <p>Join a group chat by entering the Room ID</p>
                 <form onSubmit={handleSubmit(onSubmit)} className="modal-input">
-                    <input placeholder='Room ID' {...register("roomId", {min: 0})}/>
+                    <input placeholder='Room ID' {...register("roomId", {required: true, min: 0})}/>
                     <button type="submit">Join</button>
                 </form>
                 {errors.roomId?.message && <p className="error-message">{errors.roomId?.message}</p>}

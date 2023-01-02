@@ -1,4 +1,5 @@
 import React from 'react'
+import { useChat } from '../../context/ChatAppContext';
 import { useSocket } from '../../context/SocketContext';
 import GroupChatIcon from '../GroupChatIcon';
 
@@ -13,7 +14,8 @@ type GroupChatItemProps = {
 
 const GroupChatItem = (props: GroupChatItemProps) => {
     const { sendMessage } = useSocket();
-  
+    const { currentChatRoom } = useChat();
+
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
       e.preventDefault();
       sendMessage("GET_MESSAGES", {roomId: props.roomId});
@@ -22,7 +24,7 @@ const GroupChatItem = (props: GroupChatItemProps) => {
     
     
     return (
-      <div onClick={handleClick} className='server-overview'>
+      <div onClick={handleClick} className={`server-overview ${currentChatRoom?.roomId === props.roomId ? "active" : ""}`}>
         {/* <div className='server-icon'></div> */}
         <GroupChatIcon className='server-icon' groupChatName={props.roomName} groupChatId={props.roomId} />
         <div className='server-info'>

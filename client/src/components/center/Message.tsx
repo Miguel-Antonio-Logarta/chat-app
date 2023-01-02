@@ -60,8 +60,9 @@ const Message = ({
       <TimestampSeparator timestamp={timestamp} lastTimestamp={lastTimestamp} />
       <div className={`message ${placeRight && `owner`} ${spacingType}`}>
         {/* <div className="profile-picture"></div> */}
-        {/* ERROR HERE: We need the sender's ID instead of message ID */}
-        <ProfileImage className="profile-picture" username={username} id={userId} />
+        <ProfileImage className={`profile-picture ${spacingType === "small-msg-margin" ? "invisible" : ""}`} 
+                      username={username} id={userId} 
+        />
         <p className="username">{username}</p>
         {spacingType !== "small-msg-margin" && (
           <p className="timestamp">sent: {readableTime}</p>
