@@ -33,7 +33,12 @@ export type SendMessage = {
     payload: unknown;
 }
 
-export enum EventTypes {
+export type GetLatestMessage = {
+    room_id: string;
+    no_of_messages: number; 
+}
+
+export enum Events {
     SEND_MESSAGE = "SEND_MESSAGE",
     GET_MESSAGES = "GET_MESSAGES",
     CREATE_GROUP_CHAT = "CREATE_GROUP_CHAT",
@@ -50,4 +55,7 @@ export enum EventTypes {
     CONFIRM_SEND_FRIEND_REQUEST = "CONFIRM_SEND_FRIEND_REQUEST",
     ACCEPT_FRIEND_REQUEST = "ACCEPT_FRIEND_REQUEST",
     REJECT_FRIEND_REQUEST = "REJECT_FRIEND_REQUEST",
+    GET_LATEST_MESSAGES = "GET_LATEST_MESSAGES",
 }
+
+export type EventTypes = keyof typeof Events;

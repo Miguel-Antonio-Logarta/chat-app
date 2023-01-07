@@ -116,3 +116,7 @@ class InviteToGroupChat(BaseModel):
 
 class Friend(BaseModel):
     friend_id: int
+
+class LatestMessages(BaseModel):
+    room_id: int
+    no_of_messages: int

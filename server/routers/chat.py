@@ -81,6 +81,9 @@ async def websocket_endpoint(
                 case "REJECT_FRIEND_REQUEST":
                     friend = schemas.Friend(**parsed_data.payload)
                     await chat_events.reject_friend_request(websocket, friend, user, db, connection_manager)
+                case "GET_LATEST_MESSAGES":
+                    messages_request = schemas.LatestMessages(**parsed_data.payload)
+                    await chat_events.get_lastest_messages(websocket, messages_request, user, db, connection_manager)
                 case _:
                     await websocket.send_json({"type": "NOT_FOUND", "payload": "No matching event"})
         except WebSocketEventException as err:

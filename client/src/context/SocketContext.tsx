@@ -14,11 +14,11 @@ type SocketContextType = {
     socket: ReconnectingWebSocket;
     isConnected: () => boolean;
     // isConnected: boolean;
-    on: (eventType: string, f: (payload: any) => void) => Function;
-    off: (eventType: string, f: Function) => void;
-    onError: (eventType: string, f: (payload: any) => void) => Function;
-    offError: (eventType: string, f: Function) => void;
-    sendMessage: (eventType: string, payload: any) => void;
+    on: (eventType: EventTypes, f: (payload: any) => void) => Function;
+    off: (eventType: EventTypes, f: Function) => void;
+    onError: (eventType: EventTypes, f: (payload: any) => void) => Function;
+    offError: (eventType: EventTypes, f: Function) => void;
+    sendMessage: (eventType: EventTypes, payload: any) => void;
 }
 
 const options = {
@@ -38,7 +38,7 @@ export const SocketProvider = ({children}: SocketProviderProps) => {
 
     let rws: ReconnectingWebSocket = new ReconnectingWebSocket(`${process.env.REACT_APP_WS}?token=${cookies.token}`, [], options);
 
-    const on = (eventType: string, f: (payload: any) => void): Function => {
+    const on = (eventType: EventTypes, f: (payload: any) => void): Function => {
         // Adds event listener to socket.
         console.log("Event Listeners", eventListeners);
         const eventListener = eventListeners.get(eventType);

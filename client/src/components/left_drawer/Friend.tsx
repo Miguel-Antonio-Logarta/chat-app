@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatAppContext";
 import { useSocket } from "../../context/SocketContext";
 import ProfileImage from "../ProfileImage";
+import dayjs from 'dayjs';
 
 type FriendProps = {
   id: number;
@@ -13,9 +14,10 @@ type FriendProps = {
 };
 
 const Friend = (props: FriendProps) => {
-  const { sendMessage } = useSocket();
+  const { sendMessage, on, off } = useSocket();
   const { username } = useAuth();
   const { currentChatRoom } = useChat();
+  const [latestMessage, setLatestMessage] = useState<any>(null);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -27,6 +29,33 @@ const Friend = (props: FriendProps) => {
     }
   };
 
+  useEffect(() => {
+    sendMessage("GET_LATEST_MESSAGES", {
+      roomId: props.roomId,
+      noOfMessages: 1
+    })
+  }, [props.roomId, sendMessage]);
+
+  useEffect(() => {
+    const getLatestMessage = (payload: any) => {
+      console.log(payload);
+      // setLatestMessage((message: any) => payload.messages[0] ? payload.messages[0] : null);
+      setLatestMessage((message: any) => {
+        if (payload.roomId === props.roomId && payload.messages[0]) {
+          return payload.messages[0];
+        } else {
+          return message;
+        }
+      });
+    }
+
+    on("GET_LATEST_MESSAGES", getLatestMessage);
+
+    return () => {
+      off("GET_LATEST_MESSAGES", getLatestMessage);
+    }
+  }, [on, off, props.roomId])
+
   return (
     <div onClick={handleClick} className={`friend-overview ${currentChatRoom?.roomId === props.roomId ? "active" : ""}`}>
       <div
@@ -37,7 +66,8 @@ const Friend = (props: FriendProps) => {
       </div>
       <div className="friend-info">
         <h4>{props.username}</h4>
-        <p>{props.description}@##:##</p>
+        {latestMessage && <p>{`${latestMessage.message} @ ${dayjs(latestMessage.timestamp).format('DD/MM/YYYY')}`}</p>}
+        {/* <p>{props.description}@##:##</p> */}
       </div>
     </div>
   );

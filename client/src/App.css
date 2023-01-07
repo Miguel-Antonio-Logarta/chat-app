@@ -247,6 +247,18 @@ header nav ul li a {
     padding: 64px 0px;
 }
 
+.server-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* .server-overview .server-info {
+    display: grid;
+
+    align-items: center;
+} */
+
 /* .server-overview {
     display: grid;
     grid-template: max-content auto / max-content auto;

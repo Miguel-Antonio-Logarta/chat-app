@@ -87,3 +87,46 @@ async def get_messages(websocket: WebSocket, room: schemas.Room, user: models.Us
             "messages": messages_out
         }
     })
+
+async def get_lastest_messages(websocket: WebSocket, messages_request: schemas.LatestMessages, user: models.User, db: Session, manager: ConnectionManager):
+    "Gets the latest messages in a room"
+    # Check if user is a member of the room
+    is_member = db.query(models.Room, models.Participant) \
+                    .filter(models.Participant.room_id == models.Room.id,
+                            models.Participant.user_id == user.id,
+                            models.Participant.room_id == messages_request.room_id) \
+                    .first()
+    if is_member is None:
+        # Send an error back
+        raise WebSocketEventException(
+                event_name="GET_MESSAGES", 
+                message="User cannot read messages from a room they are not part of, or read messages from a room that does not exist", 
+                other={"room_id": messages_request.room_id}
+            )
+
+    (db_room, db_participant) = is_member
+
+    # Get latest message from the room
+    query = db.query(models.Message, models.User) \
+                .filter(models.Message.room_id == messages_request.room_id, 
+                        models.Message.user_id == models.User.id) \
+                .order_by(models.Message.created_on.desc()) \
+                .limit(messages_request.no_of_messages)
+    messages_out: List[schemas.SendMessage] = []
+    for db_message, db_user in query:
+        messages_out.append({
+            "id": db_message.id,
+            "username": db_user.username,
+            "user_id": db_message.user_id,
+            "message": db_message.message,
+            "timestamp": db_message.created_on.isoformat()
+        })
+    
+    await manager.send_personal_message(websocket, {
+        "type": "GET_LATEST_MESSAGES",
+        "payload": {
+            "room_name": db_room.name,
+            "room_id": messages_request.room_id,
+            "messages": messages_out
+        }
+    })

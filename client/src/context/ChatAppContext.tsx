@@ -105,7 +105,7 @@ export const ChatAppContextProvider = ({children}: ChatAppContextProviderProps) 
         on("CREATE_GROUP_CHAT", handleCreateGroupChat);
         on("CONFIRM_JOIN_GROUP_CHAT", handleConfirmJoinGroupChat);
         on("LEAVE_GROUP_CHAT", handleLeaveGroupChat);
-        on("INVITED_TO_GROUP_CHAT", handleInvitedToGroupChat);
+        // on("INVITED_TO_GROUP_CHAT", handleInvitedToGroupChat); <-- Re-add these asap
         // on("INVITE_TO_GROUP_CHAT",) <- Only adds a new member to a group chat
         // on("GET_ROOM_INFO",)
         // on("JOIN_GROUP_CHAT",) <- this only grabs info, and doesn't change state of group chats
@@ -114,8 +114,8 @@ export const ChatAppContextProvider = ({children}: ChatAppContextProviderProps) 
             off("GET_GROUP_CHATS", handleGroupChats);
             off("CREATE_GROUP_CHAT", handleCreateGroupChat);
             off("LEAVE_GROUP_CHAT", handleLeaveGroupChat);
-            off("CONFIRM_JOIN_GROUP_CHAT", handleConfirmJoinGroupChat);
-            off("INVITED_TO_GROUP_CHAT", handleInvitedToGroupChat);
+            // off("CONFIRM_JOIN_GROUP_CHAT", handleConfirmJoinGroupChat); <-- Re-add these asap
+            // off("INVITED_TO_GROUP_CHAT", handleInvitedToGroupChat); <-- Re-add these asap
         }
     }, [sendMessage, on, off])
 
@@ -159,22 +159,10 @@ export const ChatAppContextProvider = ({children}: ChatAppContextProviderProps) 
             ])
         }
 
-        const handleFriendRequestAccepted = (payload: any) => {
-            setFriends((friends) => [
-                ...friends,
-                {
-                    userId: payload.friendId,
-                    username: payload.friendUsername,
-                    roomId: payload.roomId
-                }
-            ])
-        }
-
         on("GET_FRIENDS", handleGetFriends);
         on("GET_FRIEND_REQUESTS", handleGetFriendRequests);
         on("ACCEPT_FRIEND_REQUEST", handleAcceptFriendRequest);
-        on("RECEIVE_FRIEND_REQUEST", handleReceiveFriendRequest);
-        on("FRIEND_REQUEST_ACCEPTED", handleFriendRequestAccepted);
+        // on("RECEIVE_FRIEND_REQUEST", handleReceiveFriendRequest); <-- Re-add these asap
         // on("CREATE_FRIEND_CHAT",)
 
     
@@ -182,8 +170,7 @@ export const ChatAppContextProvider = ({children}: ChatAppContextProviderProps) 
         off("GET_FRIENDS", handleGetFriends);
         off("GET_FRIEND_REQUESTS", handleGetFriendRequests);
         off("ACCEPT_FRIEND_REQUEST", handleAcceptFriendRequest);
-        off("RECEIVE_FRIEND_REQUEST", handleReceiveFriendRequest);
-        off("FRIEND_REQUEST_ACCEPTED", handleFriendRequestAccepted);
+        // off("RECEIVE_FRIEND_REQUEST", handleReceiveFriendRequest); <-- Re-add these asap
       }
     }, [sendMessage, on, off])
 
