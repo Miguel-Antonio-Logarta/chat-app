@@ -2,6 +2,7 @@
 import React from "react";
 import { MdClose } from "react-icons/md";
 import { useSocket } from "../../context/SocketContext";
+import GroupChatIcon from "../GroupChatIcon";
 import Modal from "../Modal";
 
 // There are two close events we should pass as props
@@ -39,7 +40,8 @@ const CofirmJoinGroupChat = (props: Props) => {
         </button>
         <div className="join-prompt">
           {/* <h2 className="thin-yellow-font">Add Group Chat</h2> */}
-          <div className="large-server-icon"></div>
+          {/* <div className="large-server-icon"></div> */}
+          <GroupChatIcon className="large-server-icon" groupChatName={props.roomName} groupChatId={props.roomId}/>
           <h2>Welcome to {props.roomName}</h2>
           <p>{props.memberCount} Members</p>
           <div className="join-buttons">

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { MdClose } from 'react-icons/md';
 import { useSocket } from '../../context/SocketContext';
 import Modal from '../Modal';
+import ProfileImage from '../ProfileImage';
 
 type Props = {
     friendId: number;
@@ -49,7 +50,8 @@ const ConfirmSendFriendRequest = ({confirmFriendRequest, ...props}: Props) => {
             <MdClose />
           </button>
           <div className="join-prompt">
-            <img src={props.friendProfilePicture} alt={props.friendUsername} className="large-server-icon" />
+            {/* <img src={props.friendProfilePicture} alt={props.friendUsername} className="large-server-icon" /> */}
+            <ProfileImage className='large-server-icon' id={props.friendId} username={props.friendUsername} />
             {/* {props.friendProfilePicture ? 
               <img src={props.friendProfilePicture} alt={props.friendUsername} className="large-server-icon" /> : 
               <div className="large-server-icon"></div>

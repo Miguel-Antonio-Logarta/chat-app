@@ -29,13 +29,13 @@ const SendMessage = (props: Props) => {
   
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="chat-messages-input">
-      <button className="square-button">
+      {/* <button className="square-button">
         <MdOutlineImage className="icon" />
       </button>
 
       <button className="square-button">
         <MdTagFaces className="icon" />
-      </button>
+      </button> */}
       <input
         {...register("message", {
           required: true,

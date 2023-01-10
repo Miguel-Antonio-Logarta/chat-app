@@ -746,22 +746,15 @@ header nav ul li a {
 }
 
 .chat-messages-input {
-    /* grid-area: chat-messages-input; */
     display: grid;
     align-items: center;
-    grid-template: 1fr / max-content max-content 1fr max-content;
-    /* column-gap: 16px; */
-    /* justify-items: center; */
+    /* grid-template: 1fr / max-content max-content 1fr max-content; */
+    grid-template: 1fr / 1fr max-content;
     color: var(--primary);
     margin: 0 32px 32px 32px;
     border-radius: 16px;
-    /* padding: 0 16px 0 0; */
     padding: 0 16px;
     background: var(--darker-desaturated-blue);
-    /* padding: 0 10%; */
-    /* border-left: 1px solid var(--dark-blue);
-    border-right: 1px solid var(--dark-blue); */
-    /* border: 2px solid var(--dark-desaturated-blue); */
 }
 
 /* .chat-messages-input .square-button:first-child {
@@ -792,19 +785,15 @@ header nav ul li a {
 }
 
 .chat-messages-input input {
-    /* height: 40px; */
-    /* background: #14213E; */
     background: var(--darker-desaturated-blue);
     border: none;
-    border-left: 1px solid var(--dark-desaturated-blue);
-    /* border-radius: 4px; */
-    /* width: 100%; */
+    /* vvvv Re add this once file uploading and emoji keyboard is available vvvv */
+    /* border-left: 1px solid var(--dark-desaturated-blue); */
     width: calc(100% - 16px);
     color: var(--off-white);
     padding: 24px 16px;
     font-size: 16px;
     margin-left: 16px;
-    /* margin: 12px; */
 }
 
 .chat-messages-input input:focus {
