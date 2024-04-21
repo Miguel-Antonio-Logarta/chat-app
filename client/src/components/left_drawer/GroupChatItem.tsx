@@ -15,10 +15,11 @@ type GroupChatItemProps = {
 const GroupChatItem = (props: GroupChatItemProps) => {
     const [latestMessage, setLatestMessage] = useState<any>(null);
     const { sendMessage, on, off } = useSocket();
-    const { currentChatRoom } = useChat();
+    const { currentChatRoom, setCurrentChatRoom } = useChat();
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
       e.preventDefault();
+      setCurrentChatRoom(null);
       sendMessage("GET_MESSAGES", {roomId: props.roomId});
       sendMessage("GET_ROOM_INFO", {roomId: props.roomId});
     }

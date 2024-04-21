@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { Friend, FriendRequest, GroupChat } from "../types";
+import { Friend, FriendRequest, GroupChat, UserInfoType } from "../types";
 import { useSocket } from "./SocketContext";
 
 type ChatAppContextProviderProps = {
@@ -17,10 +17,7 @@ type ChatAppContextType = {
     setCurrentChatRoom: React.Dispatch<React.SetStateAction<CurrentChatRoomType | null>>;
 }
 
-type UserInfoType = {
-    userId: number;
-    username: string;
-}
+
 
 type CurrentChatRoomType = {
     roomId: number;

@@ -16,11 +16,12 @@ type FriendProps = {
 const Friend = (props: FriendProps) => {
   const { sendMessage, on, off } = useSocket();
   const { username } = useAuth();
-  const { currentChatRoom } = useChat();
+  const { currentChatRoom, setCurrentChatRoom } = useChat();
   const [latestMessage, setLatestMessage] = useState<any>(null);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setCurrentChatRoom(null);
     if (props.roomId) {
       sendMessage("GET_MESSAGES", { roomId: props.roomId });
       sendMessage("GET_ROOM_INFO", { roomId: props.roomId });

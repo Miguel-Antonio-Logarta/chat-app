@@ -59,3 +59,8 @@ export enum Events {
 }
 
 export type EventTypes = keyof typeof Events;
+
+export type UserInfoType = {
+    userId: number;
+    username: string;
+}
